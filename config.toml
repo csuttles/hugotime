@@ -1,4 +1,4 @@
-baseURL = "http://blog.ctlfish.org"
+baseURL = "https://blog.ctlfish.org"
 languageCode = "en-US"
 defaultContentLanguage = "en-US"
 title = "blog.csuttles.io"
