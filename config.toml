@@ -1,0 +1,49 @@
+baseURL = "https://blog.csuttles.io"
+languageCode = "en-US"
+defaultContentLanguage = "en-US"
+title = "blog.csuttles.io"
+theme = "dream"
+
+copyright = '<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">blog.csuttles.io</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="blog.csuttles.io" property="cc:attributionName" rel="cc:attributionURL">Chris Suttles</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="blog.csuttles.io" rel="dct:source">blog.csuttles.io</a>.<br />Permissions beyond the scope of this license may be available at <a xmlns:cc="http://creativecommons.org/ns#" href="blog.csuttles.io" rel="cc:morePermissions">blog.csuttles.io</a>'
+
+googleAnalytics = ""
+
+disqusShortname = "ctlfish"
+
+enableRobotsTXT = true
+
+hasCJKLanguage = false
+
+# https://gohugo.io/news/0.60.0-relnotes/
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[params]
+  # background = "black"
+  backgroundImage = "/images/bg.jpg"
+  linkColor = "seagreen"
+
+  author = "Chris_Suttles = csuttles = ctlfish"
+  description = "where in the world is Rick Ross?"
+  avatar = "/images/me.jpg"
+  motto = "# your hustle will determine your worth"
+
+  email = "blog@ctlfish.org"
+  twitter = "ctlfish_"
+  #facebook = ""
+  #instagram = ""
+  linkedin = "chrissuttles"
+  github = "csuttles"
+  #stackoverflow = ""
+  #codepen = ""
+
+  siteStartYear = 2017
+
+  favicon = "/favicon.ico"
+
+  # dark mode
+  darkLinkColor = "darkseagreen"
+  darkNav = true
+  dark404Button = true
