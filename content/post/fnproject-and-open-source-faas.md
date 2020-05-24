@@ -34,19 +34,16 @@ The talk sparked my interest. I decided to run through the quickstart and a few 
 
 I had most of the prerequisites, so I did:
 
-{{< highlight markdown >}}
-
+```
 brew install fn
 fn start
 mkdir -p fnproject/hello
 cd $!
-
-{{< / highlight >}}
+```
 
 Then I created a simple golang program based on the docs with this content, named `func.go`:
 
-{{< highlight markdown >}}
-
+```
 package main
 
 import (
@@ -56,34 +53,38 @@ import (
 func main() {
   fmt.Println("Hello from Fn!")
 }
-
-{{< / highlight >}}
+```
 
 Next I ran:
 
-{{< highlight markdown >}}
-
+```
 fn init
 export FN_REGISTRY=<my docker registry>
 fn run
 fn deploy --app myapp
-
-{{< / highlight >}}
+```
 
 Then I was calling my function (func.go) with:
 
-{{< highlight markdown >}}
-
+```
 curl http://localhost:8080/r/myapp/hello
 # or:
 fn call myapp /hello
-
-{{< / highlight >}}
+```
 
 There's also a built in dashboard, which was easily launched with:
 
-{{< highlight markdown >}}
-
+```
 docker run --rm -it --link fnserver:api -p 4000:4000 -e "FN_API_URL=http://api:8080" fnproject/ui
+```
 
-{{< / highlight >}}
+It was easy to see invocations, and more detail in the terminal too:
+
+![Screen-Shot-2017-12-13-at-10.03.14-PM-1](/content/images/2017/12/Screen-Shot-2017-12-13-at-10.03.14-PM-1.png)
+
+The right pane of tmux is the result of `fn calls list myapp`.
+
+#### Summary
+
+While there are other contenders that are similar, like [Kubeless](https://github.com/kubeless/kubeless) or [OpenFaaS](https://github.com/openfaas/faas), I thought the Fn Project was impressive. Admittedly, I haven't spent a lot of time digging into the alternatives, and mention them mostly for completeness sake. If you are in a committed relationship with Kubernetes, Kubeless might be a better choice due to its tight integration with Kubernetes; it uses CRDs, which is also on the roadmap for Fn, but it's in Kubeless right now. OpenFaaS looks like it has a lot of similar features (including Flow), but I think the documentation for Fn Project seems a bit more clear and complete, and it looks a bit more modular in design, with multiple options for underpinning services like database and message queue. Overall, if you are considering deploying (or contributing to!) a FaaS framework, the Fn Project is worth a look.
+

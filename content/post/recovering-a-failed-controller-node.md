@@ -28,23 +28,19 @@ I configured Galera on the host [as described in a previous post](http://blog.hi
 
 example grastate.dat:
 
-{{< highlight markdown >}}
-
+```
 # GALERA saved state
 version: 2.1
 uuid:    08e5cdf5-32b1-11e7-8a55-33a0042f0e96
 seqno:   -1
 safe_to_bootstrap: 0
-
-{{< / highlight >}}
+```
 
 Just to make myself feel a little less nervous, I ran some simple sanity checks on all the Galera nodes and made sure I got the same result:
 
-{{< highlight markdown >}}
-
+```
 mysql nova -e 'select count(*) from instances;'
-
-{{< / highlight >}}
+```
 
 What a relief!
 
@@ -52,24 +48,20 @@ What a relief!
 
 Again, I will refer to [a previous post on configuration for reference](http://blog.highspeedlogic.org/clustering-rabbitmq-on-ipv6-only-with-openstack-ocata/). Fortunately, I did the right things and folded the changes mentioned there into our Ansible automation for RabbitMQ, appending  this to `/etc/rabbit/rabbitmq-env.conf`:
 
-{{< highlight markdown >}}
-
+```
 SERVER_ERL_ARGS="-proto_dist inet6_tcp +P 1048576"
 CTL_ERL_ARGS=${SERVER_ERL_ARGS}
-
-{{< / highlight >}}
+```
 
 That sets up Erlang under RabbitBQ correctly to cluster on IPv6.
 
 Since the node that failed was the master of the cluster, and anything lingering in the queue is not worthwhile, I simply stopped rabbitmq everywhere, blew away the mnesia dir and rebuilt the cluster from scratch.
 
-{{< highlight markdown >}}
-
+```
 systemctl stop rabbitmq-server
 rm -rf /var/lib/rabbitmq/mnesia/*
 systemctl start rabbitmq-server
-
-{{< / highlight >}}
+```
 
 Then I copied the erlang cookie to the repaired node, and ran through the cluster join procedure in [the OpenStack HA Guide](https://docs.openstack.org/ha-guide/shared-messaging.html#rabbitmq-configure).
 
@@ -79,8 +71,7 @@ Because I destroyed the queues and config, I also needed to set up permissions i
 
 Next, I needed to run through the configs and make sure that when I start OpenStack services again, I don't explode the world. For the most part, this was a noop, but it's better to check than to wish I checked after the damage is done. The one difference I found was in recently merged changes that referred to a separate instance of RabbitMQ for notifications. This was present on the new node, but not on the old nodes. The other difference was in the specification of transport_url, which referred only to a single host instead of the whole RabbitMQ cluster. Once I checked and fixed configs, I ran through restarting services in roughly this order:
 
-{{< highlight markdown >}}
-
+```
 glance-api
 glance-registry
 nova-api
@@ -100,8 +91,7 @@ heat-api
 heat-api-cfn
 apache2
 haproxy
-
-{{< / highlight >}}
+```
 I logged in to horizon and things were looking good.
 
 ###### Verification is the hard part
@@ -118,17 +108,13 @@ Logging in to horizon and giving a thumbs up is a pretty lazy verification; here
 
 Sounds great. Step 1, launching an instance was a failure. I ended up with errors creating volumes. I followed cinder-scheduler.log and found that no backends were available:
 
-{{< highlight markdown >}}
-
+```
 INFO cinder.scheduler.base_filter ... Filtering removed all hosts for the request with volume ID 'xxx'. Filter results: AvailabilityZoneFilter: (start: 24, end: 0), CapacityFilter: (start: 0, end: 0), CapabilitiesFilter: (start: 0, end: 0)
-
-{{< / highlight >}}
+```
 ...
-{{< highlight markdown >}}
-
+```
 cinder.scheduler.flows.create_volume.ScheduleCreateVolumeTask;volume:create: No valid backend was found. No weighed backends available
-
-{{< / highlight >}}
+```
 
 I checked `openstack volume service list` and found duplicate backends for every storage node and backend. One up, one down. I generated a list of the bad ones with `openstack volume service list -f value -c Binary -c Host -c State | awk '/down/ {print $1 " " $2}'`, and then used `cinder-manage service remove BINARY HOST`, [as suggested in this post on OpenStack ask](https://ask.openstack.org/en/question/35046/how-to-delete-a-cinder-service/).
 
@@ -158,45 +144,43 @@ Volume CRUD works fine in all availability zones. We use `cross_az_attach=false`
 
 The basic flow for testing this was:
 
-{{< highlight markdown >}}
-
+```
 openstack volume create --type $type --size 100 --availability-zone $az $volname
 openstack server add volume $server_id $vol_id
 openstack server remove volume $server_id $vol_id
 openstack volume delete $vol_id
-
-{{< / highlight >}}
+```
 During the course of testing this, it was late, and I was getting tired, so I made a mistake. I accidentally validated the `cross_az_attach=false` parameter, and got this helpful message:
 
-{{< highlight markdown >}}
-
+```
 openstack server add volume 868fbde4-FFFF-FFFF-baae-b132ebe844ed 086f3021-4ea8-FFFF-FFFF-6aa27ef4a069
 
 Invalid volume: Instance 186 and volume 086f3021-4ea8-FFFF-FFFF-6aa27ef4a069 are not in the same availability_zone. Instance is in AZ1. Volume is in AZ3 (HTTP 400) (Request-ID: req-736732d7-FFFF-FFFF-839c-92b23cbca6a8)
-
-{{< / highlight >}}
+```
 
 I double checked RabbitMQ and Galera, and all appears well in both:
 
-{{< highlight markdown >}}
-
+```
 # rabbitmqctl list_queues | grep -v 0$
 Listing queues ...
-
-{{< / highlight >}}
+```
 
 No stuck messages in queues.
 
-{{< highlight markdown >}}
-
+```
 rabbitmqctl cluster_status
-
-{{< / highlight >}}
+```
 
 All nodes report the same cluster_status / membership.
 
-{{< highlight markdown >}}
-
+```
 MariaDB [(none)]> show status like 'wsrep%';
+```
+This all looks good, according to [the official Galera docs on monitoring the cluster](http://galeracluster.com/documentation-webpages/monitoringthecluster.html).
 
-{{< / highlight >}}
+The last thing to do was add a stack. I fired off a simple single server test stack to validate heat was working. I checked the output of `openstack server list`, `openstack stack list` and `openstack stack show $mystackid`.
+
+Lastly, I installed and checked our custom daemon to sync with IPAM, and was able to validate that test nodes I created were getting pushed to IPAM and therefore DNS.
+
+It is with great joy that I can finally publish this post. I wrote this as I worked through the recovery. When it got a little rough I was glad to have notes. Now, I am glad to be done.
+

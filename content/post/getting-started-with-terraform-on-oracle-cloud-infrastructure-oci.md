@@ -18,8 +18,7 @@ Getting started with the [OCI terraform provider](https://www.terraform.io/docs/
 
 I like to re-use a pattern that I learned from some of my very talented colleagues. It looks like this:
 
-{{< highlight markdown >}}
-
+```
 csuttles@cs-mbp15:[~/src/oci-vault]:(master)
 [Exit: 0 0] 12:46: find . -type d | grep -vP '.git|.terr'
 .
@@ -31,13 +30,11 @@ csuttles@cs-mbp15:[~/src/oci-vault]:(master)
 ./iad/network
 ./iad/vault
 ./modules
-
-{{< / highlight >}}
+```
 
 To summarize, the base of the repo is the tenancy. The common directory is for resources that are global (IAM). The modules dir is of course for modules, and the phx and iad dirs are regions. Beneath each region, there is a subdirectory per compartment. In this example, there are only two: network, and vault.It's also possible to slightly modify this and use the tenancy and modules as first order directories to support multi-tenancy in a single repo. That looks more like this:
 
-{{< highlight markdown >}}
-
+```
 csuttles@cs-mbp15:[~/src/oci-vault-multitenant]:(master)
 [Exit: 0 0] 12:53: find . -type d | grep -vP '.git|.terr'
 .
@@ -66,15 +63,13 @@ csuttles@cs-mbp15:[~/src/oci-vault-multitenant]:(master)
 ./tenancy2/iad/network
 ./tenancy2/iad/vault
 ./modules
-
-{{< / highlight >}}
+```
 
 ## Define the Provider and Storage Backend
 
 Within each directory with configs, you must define the provider and (optionally) a storage backend. My provider configuration looks like this, and is part of my `variables.tf` in the common directory:
 
-{{< highlight markdown >}}
-
+```
 variable "tenancy" {}
 variable "tenancy_ocid" {}
 variable "user_ocid" {}
@@ -93,13 +88,11 @@ private_key_path = "${var.private_key_path}"
 region = "${var.region}"
 version = "~> 3.1.0"
 }
-
-{{< / highlight >}}
+```
 
 I also store terraform state in OCI, using the Object Storage S3 compatible API, as described [here](https://medium.com/oracledevs/storing-terraform-remote-state-to-oracle-cloud-infrastructure-object-storage-b32fe7402781). Here's an example of two ways to do it:
 
-{{< highlight markdown >}}
-
+```
 # use s3 compatible API
 terraform {
 backend "s3" {
@@ -125,13 +118,11 @@ address       = "https://objectstorage.us-ashburn-1.oraclecloud.com/p/big-par-ba
 }
 }
 */
-
-{{< / highlight >}}
+```
 
 All of the variables that this depends on are defined as environment vars in a separate file that I source before running terraform. That looks like this:
 
-{{< highlight markdown >}}
-
+```
 csuttles@cs-mbp15:[~/src/oci-vault/common]:(master)
 [Exit: 0] 13:09: cat ~/.oci/oci-vault.sh
 #!/bin/bash
@@ -142,15 +133,13 @@ export TF_VAR_compartment_ocid="ocid1.tenancy.oc1..long-string-of-ocid"
 export TF_VAR_user_ocid="ocid1.user.oc1..long-string-of-ocid"
 export TF_VAR_fingerprint="de:ad:be:ef:ca:fe:d0:0d:00:ca:b0:b0:b0:de:ad:be:ef"
 export TF_VAR_private_key_path="${HOME}/.oci/your_actual_oci_api_key.pem"
-
-{{< / highlight >}}
+```
 
 ## Define Resources
 
 Let's dig into the resource definitions in the common directory, since IAM is the foundation of everything, and those resources are available globally.
 
-{{< highlight markdown >}}
-
+```
 csuttles@cs-mbp15:[~/src/oci-vault/common]:(master)
 [Exit: 0] 12:55: cat compartments.tf
 resource "oci_identity_compartment" "network_compartment" {
@@ -206,5 +195,11 @@ output "network_compartment" {
 output "vault_compartment" {
   value = "${oci_identity_compartment.vault_compartment.id}"
 }
+```
 
-{{< / highlight >}}
+In this file I am simply defining two compartments, which we will use for organization of resources and policy later.
+
+## Summary
+
+This is just the beginning, and should get you as far as a `terraform init && terraform plan`. I plan to continue this post as a series, where we will explore building out the [Hashicorp Vault reference architecture for a single DC](https://www.vaultproject.io/guides/operations/reference-architecture.html#one-dc).
+

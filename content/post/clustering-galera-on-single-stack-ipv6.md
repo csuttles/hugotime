@@ -34,8 +34,7 @@ I got most of what I needed from the [blog post](https://blog.widodh.nl/2016/02/
 
 For reference sake, here's a diff of my config before and after:
 
-{{< highlight markdown >}}
-
+```
 diff -u 50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 --- 50-server.cnf       2017-05-06 15:55:26.813413438 -0700
 +++ /etc/mysql/mariadb.conf.d/50-server.cnf     2017-05-06 17:53:30.208914326 -0700
@@ -72,15 +71,13 @@ diff -u 50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 
  # this is only for embedded server
  [embedded]
-
-{{< / highlight >}}
+```
 
 ###### IPv6 and SST
 
 After turning up logging and digging a bit, I saw that SST was failing and rsync was throwing an error. I dug into the rsync SST script and found that the line assigning the `RSYNC_PORT` variable assumed IPv4 syntax. I could have fixed the awk statement by changing `$2` to `$NF`, but I wanted to do a simple fix and by the time I patched this I really just wanted to see replication work, so I was a bit heavy handed. I ended up with a patch like this for `/usr/bin/wsrep_sst_rsync`:
 
-{{< highlight markdown >}}
-
+```
 diff -u wsrep_sst_rsync /usr/bin/wsrep_sst_rsync
 --- wsrep_sst_rsync     2017-05-23 15:37:30.596302338 -0700
 +++ /usr/bin/wsrep_sst_rsync    2017-05-23 15:37:41.508184365 -0700
@@ -94,5 +91,9 @@ diff -u wsrep_sst_rsync /usr/bin/wsrep_sst_rsync
      if [ -z "$RSYNC_PORT" ]
      then
          RSYNC_PORT=4444
+```
 
-{{< / highlight >}}
+###### Victory
+
+Once I patched all the nodes rsync_sst script, had all the configs set up, and did the cluster bootstrap, I was finally able to check replication and state via the `SHOW STATUS LIKE 'wsrep_%'` statement.
+
