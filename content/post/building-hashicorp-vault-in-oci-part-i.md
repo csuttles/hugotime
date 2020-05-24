@@ -18,7 +18,8 @@ This post will [continue a previous post](http://blog.csuttles.io/getting-starte
 
 Let's walk through a single region where we will build out the network resources where our Vault installation will reside. Here's the variables where we define the storage backend and Terraform provider. It's the same basic setup [as defined in my previous post](http://blog.csuttles.io/getting-started-with-terraform-on-oracle-cloud-infrastructure-oci/#define-the-provider-and-storage-backend).
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/network]:(master)
 [Exit: 0] 11:19: cat variables.tf
 variable "tenancy" {}
@@ -40,11 +41,13 @@ region = "${var.region}"
 version = "~> 3.1.0"
 }
 
-```
+
+{{< / highlight >}}
 
 ...
 
-```
+{{< highlight markdown >}}
+
 # use s3 compatible API
 terraform {
 backend "s3" {
@@ -70,13 +73,15 @@ address       = "https://objectstorage.us-ashburn-1.oraclecloud.com/p/big-par-ba
 }
 }
 */
-```
+
+{{< / highlight >}}
 
 ## Setting up a VCN
 
 In OCI a VCN is very similar to a VPC in AWS. It's easy to think of as a bag in which all your other related network resources reside. Here's the terraform config for creating a VCN.
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/network]:(master)
 [Exit: 0] 12:19: cat vcn.tf
 resource "oci_core_virtual_network" "oci-vault-vcn1" {
@@ -149,7 +154,8 @@ resource "oci_core_dhcp_options" "oci-vault-dhcp-options1" {
     search_domain_names = ["csuttles.io"]
   }
 }
-```
+
+{{< / highlight >}}
 
 ## Create Subnets and Seclists in the VCN
 
@@ -157,7 +163,8 @@ In OCI, Virtual NICs (VNICs) attach to subnets, which live inside a VCN. The sec
 
 Here's how that looks in Terraform:
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/network]:(master)
 [Exit: 0] 13:27: cat subnets.tf
 variable "availability_domain" {
@@ -201,9 +208,11 @@ data "oci_core_subnets" "oci_vault_subnets" {
 output "subnets" {
     value = "${data.oci_core_subnets.oci_vault_subnets.subnets}"
 }
-```
 
-```
+{{< / highlight >}}
+
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/network]:(master)
 [Exit: 0] 14:30: cat seclists.tf
 resource "oci_core_default_security_list" "oci-vault-default-security-list" {
@@ -252,13 +261,15 @@ resource "oci_core_default_security_list" "oci-vault-default-security-list" {
     }
   }
 }
-```
+
+{{< / highlight >}}
 
 ## Apply Infrastructure Changes via Terraform
 
 Finally, from the same directory where these resources are defined, we run `terraform apply` and create the resources in the IAD region. The pipe to Perl is just to obfuscate my OCIDs because the internet is a scary place to just leave your data lying around, and is totally unnecessary in the 'real world'.
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/network]:(master)
 [Exit: 0] 15:00: tf apply 2>&1 | perl -pe 's/ocid.([\w\.]+)\.(?:[\w]+)([\W\s]*?)$/ocid.$1.07734$2/'
 data.terraform_remote_state.common: Refreshing state...
@@ -469,10 +480,12 @@ Do you want to perform these actions?
   Only 'yes' will be accepted to approve.
 
 yes
-```
+
+{{< / highlight >}}
 ...
 
-```
+{{< highlight markdown >}}
+
 Apply complete! Resources: 10 added, 0 changed, 0 destroyed.
 
 Outputs:
@@ -553,9 +566,5 @@ subnets = [
         virtual_router_mac = 00:00:17:CF:08:33
     }
 ]
-```
 
-## Summary
-
-This is one more milestone toward a working, automated, and easily repeatable deployment of Hashicorp Vault in OCI. In the next installment, we will get to provisioning the instances and the application, using the resources we created earlier in this series.
-
+{{< / highlight >}}

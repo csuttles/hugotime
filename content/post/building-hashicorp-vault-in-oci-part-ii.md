@@ -26,7 +26,8 @@ In addition to using these attributes for our resources in our VCN, we need to d
 
 Let's start with opening ports we will need, [as defined in the Consul documentation](https://www.consul.io/docs/agent/options.html#ports).
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/network]:(master)
 [Exit: 0] 20:27: cat seclists.tf
 resource "oci_core_default_security_list" "oci-vault-default-security-list" {
@@ -135,7 +136,8 @@ resource "oci_core_default_security_list" "oci-vault-default-security-list" {
     }
   }
 }
-```
+
+{{< / highlight >}}
 
 These include DNS and UI access, but the default behavior is to bind these services to the loopback, so they are not actually accessible by default. They are included in the seclist for convenience.
 
@@ -143,7 +145,8 @@ These include DNS and UI access, but the default behavior is to bind these servi
 
 To build consul, we need somewhere to put it. Based on the [recommended architecture](https://learn.hashicorp.com/vault/operations/ops-reference-architecture#deployment-topology-within-one-datacenter)[,] we will use 5 Consul servers spread across 3 subnets as our storage backend for Vault. We'll define a map variable to allow us to spread the servers in the desired placement while doing a simple `count = 5` for the `oci_core_instance` resource.
 
-```
+{{< highlight markdown >}}
+
 variable "consul_node_to_ad_map" {
   type = "map"
 
@@ -155,11 +158,13 @@ variable "consul_node_to_ad_map" {
     "4" = "3"
   }
 }
-```
+
+{{< / highlight >}}
 
 Here's the Terraform config for the Consul servers. I leverage the output from the remote state for network and common to get the subnet and compartment, respectively. Then we define some metadata, including defining ssh_authorized_keys (so we can log in) and the user-data, which is how we will configure the Consul cluster. I also defined some freeform tags, which we can use to label and organize our resources within OCI. I also added some outputs for convenience (the OCID of the instances and public IPs).
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 20:34: cat consul.tf
 // consul nodes
@@ -210,7 +215,8 @@ output "consul_instances" {
 output "consul_instance_public_ips" {
  value = ["${oci_core_instance.consul.*.public_ip}"]
 }
-```
+
+{{< / highlight >}}
 
 ## Cloud Init
 
@@ -218,7 +224,8 @@ We'll use `cloud-config-data` style cloud-init, passed to the instances via user
 
 There is a _lot_ going on here. This userdata creates the consul user and group, writes the config files we've embedded in base64, and then runs a series of commands. These commands configure the consul user (some parameters are not available via `cloud-config-data`) install consul, ensure correct permissions, configure the system firewall, and finally register, enable and start the consul service unit via systemd.
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 20:33: cat user-data/consul.txt
 #cloud-config
@@ -290,11 +297,13 @@ runcmd:
  - systemctl enable consul
  - systemctl start consul
  - systemctl status consul
-```
+
+{{< / highlight >}}
 
 The systemd unit file is pretty simple, and is the same configuration used in the [Consul deployment guide](https://www.consul.io/docs/guides/deployment-guide.html#configure-systemd).
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 11:48: cat user-data/consul.service
 [Unit]
@@ -315,11 +324,13 @@ LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target
-```
+
+{{< / highlight >}}
 
 The configuration files for Consul are also very simple.
 
-```
+{{< highlight markdown >}}
+
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 11:49: cat user-data/consul.hcl
 datacenter = "dc1"
@@ -334,13 +345,16 @@ csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 server = true
 bootstrap_expect = 5
 ui = true
-```
+
+{{< / highlight >}}
 
 This is where we are leveraging the internal DNS; the `retry_join` parameter in the config file is using a list of internal DNS names based on the `$instance_hostname_label.$subnet_dns_label.$vcn_dns_label.oraclevcn.com` hostname specification discussed earlier. This, along with `bootstrap_expect = 5` parameter allows the nodes to discover each other and bootstrap the cluster without any user interaction at all.While we have `ui = true` defined, the default behavior is to bind on the `client` service address, which defaults to `127.0.0.1`.  This means they are not accessible without establishing a tunnel to the host (we're going to use this for Vault). For convenience, they can be enabled by appending the following to `/etc/consul.d/consul.hcl` and restarting the service once the nodes are created:
 
-```
+{{< highlight markdown >}}
+
   "client_addr": "0.0.0.0"
-```
+
+{{< / highlight >}}
 
 This only really would need to be done on one node, if you wanted to check out the UI for debugging or play around with the DNS interface, which is why I left it unexposed by default (again, using this to store secrets).This will be refined in later posts in this series.
 
@@ -348,7 +362,8 @@ This only really would need to be done on one node, if you wanted to check out t
 
 All of this adds up to another simple `terraform apply`, run from within the vault directory, which deploys the nodes we will use for Consul. The `cloud-config-data` we pass in `user-data` then configures the nodes post-boot, and as the nodes configure themselves and install consul, they ultimately discover each other and form the Consul cluster we will use as our Vault storage backend.
 
-```
+{{< highlight markdown >}}
+
 [root@consul-0 ~]# consul members
 Node      Address         Status  Type    Build  Protocol  DC   Segment
 consul-0  10.0.1.30:8301  alive   server  1.3.0  2         dc1  <all>
@@ -357,5 +372,5 @@ consul-2  10.0.2.16:8301  alive   server  1.3.0  2         dc1  <all>
 consul-3  10.0.3.31:8301  alive   server  1.3.0  2         dc1  <all>
 consul-4  10.0.3.30:8301  alive   server  1.3.0  2         dc1  <all>
 [root@consul-0 ~]#
-```
 
+{{< / highlight >}}

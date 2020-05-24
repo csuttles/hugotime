@@ -18,7 +18,8 @@ I recently [installed OpenStack using Kolla into a single node](http://blog.high
 
 I ran `sudo pip install python-openstackclient` and things looked like they were working normally, until a wild traceback appears:
 
-```
+{{< highlight markdown >}}
+
 Installing collected packages: pbr, monotonic, iso8601, netifaces, netaddr, pyparsing, Babel, oslo.i18n, wrapt, debtcollector, oslo.utils, PrettyTable, unicodecsv, pyperclip, cmd2, PyYAML, stevedore, cliff, msgpack-python, oslo.serialization, simplejson, positional, keystoneauth1, python-novaclient, python-cinderclient, ipaddress, asn1crypto, enum34, pycparser, cffi, cryptography, pyOpenSSL, functools32, jsonschema, jsonpointer, jsonpatch, warlock, python-glanceclient, rfc3986, oslo.config, python-keystoneclient, requestsexceptions, appdirs, os-client-config, osc-lib, deprecation, openstacksdk, python-openstackclient
   Running setup.py install for netifaces ... done
   Found existing installation: pyparsing 2.0.1
@@ -45,7 +46,8 @@ Traceback (most recent call last):
   File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/shutil.py", line 103, in copystat
     os.chflags(dst, st.st_flags)
 OSError: [Errno 1] Operation not permitted: '/tmp/pip-wMRwXf-uninstall/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/pyparsing-2.0.1-py2.7.egg-info'
-```
+
+{{< / highlight >}}
 
 Honestly, I decided to live without `python-openstackclient` on my Mac, and chose to just manage OpenStack from the Linux node where it was running. The issue still irked me, but there are only so many hours in the day, and it's important to prioritize and choose your battles.
 
@@ -80,7 +82,8 @@ I followed the suggestion after skimming the thread and a couple others, and was
 
 Finally!
 
-```
+{{< highlight markdown >}}
+
 openstack token issue
 +------------+----------------------------------+
 | Field      | Value                            |
@@ -90,5 +93,5 @@ openstack token issue
 | project_id | 2058de16cfc9425f91394b52d9af26d7 |
 | user_id    | 65aee56966b44dc29ad57ac9050a14bf |
 +------------+----------------------------------+
-```
 
+{{< / highlight >}}

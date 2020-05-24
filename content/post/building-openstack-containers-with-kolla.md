@@ -24,30 +24,10 @@ One of the issues I ran into was with running the registry. By default, Docker w
 
 I also had some port conflicts, so I ended up customizing some of the build config. Most of my options are defaults, but some of the ones I needed to add to `/etc/kolla/globals.yml` included:
 
-```
+{{< highlight markdown >}}
+
 horizon_port: "8080"
 database_port: 3307
 enable_haproxy: "no"
-```
 
-Once those changes were in place, and I got my kolla-build done, I was on my way. I ended up passing a few flags not in the quickstart guide to be more explicit and speed things up: `kolla-build --tag 5.0.0.0b3 --cache -t binary`. [This page](https://releases.openstack.org/teams/kolla.html) was indispensible in mapping the Kolla tags to the actual OpenStack release I wanted to build.
-
-###### Finally, Deploy
-
-Once all the Docker and Kolla changes were in place, I was able to run the all-in-one install pretty easily with just:
-
-* `kolla-ansible prechecks -i /path/to/all-in-one`
-* `kolla-ansible deploy -i /path/to/all-in-one`
-* `. /etc/kolla/admin-openrc.sh`
-* `cd /usr/share/kolla-ansible && ./init-runonce`
-
-I checked `docker ps` and was able to use the openstack cli to create an instance: `openstack server create --image cirros --flavor m1.tiny --key-name mykey --nic net-id=7a6ed25b-2034-46c7-a844-e5451e361c99 demo1` (your net-id will of course be different). Everything was looking great. I ran the following command to open up ports in firewalld:
-
-`for port in $(openstack endpoint list -f value -c URL | perl -pe 's/.*://;s/\D+$/\n/;s/\/v.*$//' | sort -u ) ; do firewall-cmd --add-port=${port}/tcp; done`
-
-I tried to use the dashboard, but it didn't load. I ended up digging around in the configs and found that my port change for horizon in `/etc/kolla/globals.yml` did not take effect. I found the horizon config in `/etc/kolla/horizon/horizon.conf` and could see the default port of `80` being used. I attached to the container and saw the same. I updated the config, and restarted the container, and now I got a login page, but when I logged in I got an error page on redirect to the dashboard. I found [this RedHat bug](https://access.redhat.com/solutions/2038223) for the issue, and made similar changes. The fix was to add this Alias to the vhost config in `/etc/kolla/horizon/horizon.conf` and restart the container:
-
-`Alias /dashboard/static /usr/share/openstack-dashboard/static`
-
-After making that change, I was able to get a proper horizon dashboard and truthfully call my all-in-one deployment a success.
-
+{{< / highlight >}}

