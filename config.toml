@@ -1,6 +1,6 @@
 baseURL = "https://blog.ctlfish.org"
-languageCode = "en-US"
-defaultContentLanguage = "en-US"
+languageCode = "en"
+defaultContentLanguage = "en"
 title = "blog.csuttles.io"
 theme = "dream"
 
@@ -25,6 +25,7 @@ hasCJKLanguage = false
       table = true
       taskList = true
       typographer = false
+      highlighting = true
     [markup.goldmark.parser]
       attribute = true
       autoHeadingID = true
