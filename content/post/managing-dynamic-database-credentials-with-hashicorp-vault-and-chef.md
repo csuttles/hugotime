@@ -44,27 +44,34 @@ Once that is done, you'll also need to create a policy so you can issue tokens u
 
 I created a policy file like this:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 path "database/roles/readonly" {
   capabilities = ["read"]
 }
-```
+
+{{< / highlight >}}
 
 Then created the policy with:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 vault policy-write database-readonly database-readonly.hcl
-```
+
+{{< / highlight >}}
 
 Next I generated a renewable token for reading those credentials with:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 vault token-create -policy=database-readonly
-```
+
+{{< / highlight >}}
 
 We can see the details of the token using `vault token-lookup`:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 vault token-lookup acf245df-93aa-a853-e89a-01084d7c7af6
 Key                     Value
 ---                     -----
@@ -86,7 +93,8 @@ path                    auth/token/create
 policies                [database-readonly default]
 renewable               true
 ttl                     2758960
-```
+
+{{< / highlight >}}
 
 This token is how the Consul Template authenticates to Vault, where it reads the database credentials, which get stored in a config file on disk for our application to read. While plaintext credentials on disk are not secure, you can do some things to mitigate this risk. Vault is already rotating these credentials for you, so they are short lived. You could also use a ramdisk, which makes the most sense if you wanted to leverage this in a cloud native environment with containers. In that case, you would run the Consul Template services as a sidecar container, use a tmpfs (ramdisk) type volume for both containers, and then mount the volume in both. In this case, the Consul Template container would write the config, and the other container running your application would read it from the shared, ephemeral volume. The current best practice is to specify a ttl that is long enough for one connection to the database only; a revocation or ttl expiry does not disconnect current sessions so the idea is that every time your application connects to the database, it does so with a fresh set of credentials. With the quick ttl expiry, even if a set of credentials were compromised, the exposure window is pretty small, and if you use unique tokens and roles for each application instance, the attack surface becomes quite small too.
 
@@ -96,12 +104,15 @@ At this point, it's useful to know if what we've done so far is correct.
 
 Running:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 vault read database/creds/readonly
-```
+
+{{< / highlight >}}
 
 Should produce temporary credentials like so:
-``` bash
+{{< highlight markdown >}}
+ bash
 Key             Value
 ---             -----
 lease_id        database/creds/readonly/a2ea299d-d8d5-75cf-e77a-e7fb19ee2af8
@@ -109,18 +120,22 @@ lease_duration  5m0s
 lease_renewable true
 password        A1a-x6vxvp7v4z23wsyp
 username        v-root-readonly-tvrsw560u8t5t309
-```
+
+{{< / highlight >}}
 Note that your ttl may differ and depends on what you specified when creating the database role.
 
 Now, we simply access the database using the credentials we got from Vault, before the ttl expires. In this example, it would be something like this:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 mysql -u v-root-readonly-tvrsw560u8t5t309 -p -h mysql.example.com
-```
+
+{{< / highlight >}}
 
 You should be able to connect and select on any database, based on the role we defined earlier. Try a simple query to verify:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 mysql> SELECT user FROM mysql.user;
 +----------------------------------+
 | user                             |
@@ -134,7 +149,8 @@ mysql> SELECT user FROM mysql.user;
 | root                             |
 +----------------------------------+
 7 rows in set (0.00 sec)
-```
+
+{{< / highlight >}}
 
 In this example I am looking at users in mysql. Note the users created by Vault are all formatted similarly, and it is easy to see that I have one temporary readonly user created via root access to Vault, and two readonly users that were created using the token we created earlier.
 
@@ -182,7 +198,8 @@ The parts I added were [reading a config file to get our database connection inf
 
 I checked things in test kitchen a LOT (using only CentOS7). Once I got test kitchen to converge successfully, I also tested on a local linux box in my home lab. Running `chef-client -o recipe[echoserver]` got me all the necessary things installed on my test box. Once that was done, I verified the service was running via a simple telnet command:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 csuttles@devnull:[~]: telnet localhost 25000
 Trying 127.0.0.1...
 Connected to localhost.
@@ -194,7 +211,8 @@ performance_schema
 sys^]
 telnet> q
 Connection closed.
-```
+
+{{< / highlight >}}
 
 This step took a lot longer than the paragraph above might lead you to believe. Here's a list of things to check if it doesn't go super silky smooth as described.
 
@@ -213,7 +231,8 @@ All of those things took me time to sort out. There's definitely a learning curv
 
 The token we created is used by consul-template to communicate with vault and get database credentials, so we can revoke access by simply revoking that token. Here's a lookup of the token we created for reference:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 ~ # vault token-lookup acf245df-93aa-a853-e89a-01084d7c7af6
 Key                     Value
 ---                     -----
@@ -235,11 +254,13 @@ path                    auth/token/create
 policies                [database-readonly default]
 renewable               true
 ttl                     2698554
-```
+
+{{< / highlight >}}
 
 Here's a [call to the Vault API, looking for leases](https://www.vaultproject.io/api/system/leases.html) related to our database credentials:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 csuttles@devnull:[~/src/cault]: curl --header "X-Vault-Token:$VAULT_TOKEN" --request LIST "$VAULT_ADDR/v1/sys/leases/lookup/database/creds/readonly" | jq
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -261,20 +282,24 @@ csuttles@devnull:[~/src/cault]: curl --header "X-Vault-Token:$VAULT_TOKEN" --req
   "auth": null
 }
 [Exit: 0 0] 12:56
-```
+
+{{< / highlight >}}
 
 Now we can revoke the token from which our leases our derived. Since these leases are what creates the temporary users in MySQL, revoking the token, and therefore the leases, will also revoke the MySQL credentials. It is also possible to revoke individual leases, but if you only revoke the individual lease, the token is still valid, and Consul Template simply uses the same token to get another lease. This means you must plan carefully when mapping your tokens and leases, and think about how a revocation will impact you. If you set everything up under a single token, you will only get a "STOP EVERYTHING" button. That's better than no revocation, but not much. A better approach would be more granular division of resources each assigned a token so that revoking a token revokes access for a logical grouping of instances, like a rack, a datacenter, production or dev, etc.
 
 With all that said, let's revoke this token:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 ~ # vault token-revoke acf245df-93aa-a853-e89a-01084d7c7af6
 Success! Token revoked if it existed.
-```
+
+{{< / highlight >}}
 
 We can issue the same API (`leases/lookup`) request to verify that the leases derived from that token are also revoked:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 csuttles@devnull:[~/src/cault]: curl --header "X-Vault-Token:$VAULT_TOKEN" --request LIST "$VAULT_ADDR/v1/sys/leases/lookup/database/creds/readonly" | jq
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -282,11 +307,13 @@ csuttles@devnull:[~/src/cault]: curl --header "X-Vault-Token:$VAULT_TOKEN" --req
 {
   "errors": []
 }
-```
+
+{{< / highlight >}}
 
 Finally, we can check our application and verify it cannot connect to the database. When restarting the application to force a new MySQL connection, I get the following error, which is oddly satisfying in this case:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 csuttles@devnull:[~]: /usr/local/bin/echoserver
 Traceback (most recent call last):
   File "/usr/lib64/python3.4/site-packages/sqlalchemy/pool.py", line 1122, in _do_get
@@ -310,11 +337,13 @@ Traceback (most recent call last):
     self._dec_overflow()
 ...
 sqlalchemy.exc.OperationalError: (pymysql.err.OperationalError) (1045, "Access denied for user 'v-token-readonly-50yq76zvp4vz3u0'@'172.17.0.1' (using password: YES)")
-```
+
+{{< / highlight >}}
 
 This means that we tried to connect using the credentials derived from Vault, but were denied. We can also confirm the users are gone in MySQL:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 mysql> SELECT user FROM mysql.user;
 +---------------+
 | user          |
@@ -325,13 +354,13 @@ mysql> SELECT user FROM mysql.user;
 | root          |
 +---------------+
 4 rows in set (0.01 sec)
-```
+
+{{< / highlight >}}
 
 If we wanted to restore access at this point, we could simply generate a new token like we did previously:
 
-``` bash
+{{< highlight markdown >}}
+ bash
 vault token-create -policy=database-readonly
-```
 
-That token would replace the revoked one in the consul-template config, and operations would resume once chef converges the change.
-
+{{< / highlight >}}

