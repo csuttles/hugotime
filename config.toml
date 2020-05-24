@@ -17,8 +17,22 @@ hasCJKLanguage = false
 # https://gohugo.io/news/0.60.0-relnotes/
 [markup]
   [markup.goldmark]
+    [markup.goldmark.extensions]
+      definitionList = true
+      footnote = true
+      linkify = true
+      strikethrough = true
+      table = true
+      taskList = true
+      typographer = false
+    [markup.goldmark.parser]
+      attribute = true
+      autoHeadingID = true
+      autoHeadingIDType = "github"
     [markup.goldmark.renderer]
+      hardWraps = false
       unsafe = true
+      xhtml = false
 
 [params]
   # background = "black"

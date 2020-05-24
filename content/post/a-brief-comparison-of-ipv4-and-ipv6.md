@@ -35,7 +35,7 @@ This is an easily overlooked area where IPv6 shines. The IPv6 address architectu
 ## More Efficient Headers
 
 Here's and example of an [IPv4 Header:](https://tools.ietf.org/html/rfc791#section-3.1)
-```
+{{< highlight markdown>}}
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -51,10 +51,10 @@ Here's and example of an [IPv4 Header:](https://tools.ietf.org/html/rfc791#secti
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                    Options                    |    Padding    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-```
+{{< / highlight >}}
 
 Here's an example of an [IPv6 Header Format:](https://tools.ietf.org/html/rfc8200#section-3)
-```
+{{< highlight markdown>}}
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |Version| Traffic Class |           Flow Label                  |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -76,7 +76,7 @@ Here's an example of an [IPv6 Header Format:](https://tools.ietf.org/html/rfc820
    +                                                               +
    |                                                               |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-```
+{{< / highlight >}}
 It's important to note that both of these ASCII representations are 32 bits wide. It's very easy to see how much simpler the IPv6 header is in structure. While the large addresses do make it larger than an IPv4 header, it is much less complicated, and it was designed with efficiency in mind.
 
 This [excellent pdf from ripe](https://www.ripe.net/participate/meetings/roundtable/february-2009/RobBlokzijlroundtable2009Rob2.pdf) covers some of the key improvements in the IPv6 header, which include:
@@ -91,7 +91,7 @@ The elimination of the header checksum in IPv6 is a very important change, since
 ## Link Local Networks and SLAAC
 
 Link local addresses in IPV6 are for use on a single link. Here's the definition from [RFC 4291, section 2.5.6](https://tools.ietf.org/html/rfc4291#section-2.5.6):
-```
+{{< highlight markdown>}}
    Link-Local addresses are for use on a single link.  Link-Local
    addresses have the following format:
 
@@ -107,7 +107,7 @@ Link local addresses in IPV6 are for use on a single link. Here's the definition
 
    Routers must not forward any packets with Link-Local source or
    destination addresses to other links.
-```
+{{< / highlight >}}
 
 This facet of IPv6 is much more effective in my experience than the IPv4 counterpart, as defined in [RFC 3927](https://tools.ietf.org/html/rfc3927). In IPv4, the typical model of single addresses per host means that hosts typically get a link local address through APIPA, where DHCP fails, the host gives up, and assigns an address in the 169.245.0.0/16 range. With IPv6, however, the addressing model is designed to accommodate multiple addresses at every endpoint, so even hosts that are configured with a GUA (Global Unicast Address) also have a link local address. This means that getting packets around via only link local addressing is much more likely to succeed, since link local addressing in IPV6 includes *all hosts*, where IPv4 link local addressing likely includes only hosts that are misconfigured.
 
@@ -121,7 +121,7 @@ With IPv6 it's possible to obtain a prefix delegation from an upstream device. I
 
 [RFC 3633, section 5.1](https://tools.ietf.org/html/rfc3633#section-5.1) has a very good example of prefix delegation:
 
-```
+{{< highlight markdown>}}
 5.1.  Example network architecture
 
    Figure 1 illustrates a network architecture in which prefix
@@ -156,8 +156,7 @@ With IPv6 it's possible to obtain a prefix delegation from an upstream device. I
 +----------+ +----------+     +----------+ +----------+ /
 
    Figure 1: An example of prefix delegation.
-
-```
+{{< / highlight >}}
 
 Essentially, a DHCPv6 client requests a prefix delegation in a request similar to a DHCPv6 address request. [RFC 3633, section 7](https://tools.ietf.org/html/rfc3633#section-7) specifies that these two operations can happen in the same exchange (a client can request both an address and a prefix delegation at the same time), or independently (a client can request only an address, or only a delegation). In addition, the client can specify exactly one prefix (within the range) to be excluded in the prefix delegation request, as defined in [RFC 6603](https://tools.ietf.org/html/rfc6603). The client can also include a 'hints' for preferred prefixes in the IA_PD prefix option as part of the request to the delegating router. The delegating router ultimately decides what prefixes will be delegated, as hints are not guaranteed. Even without hints in the IA_PD option of the prefix delegation request, the IA_PD serves as a unique identifier for the requester, functioning in a manner similar to how cookies in we browsers cache a little bit of session state and help to maintain a consistent result.
 
@@ -176,7 +175,7 @@ In contrast, IPv6 supports multicast natively, and it is crucial to supporting p
 
 [RFC 3315, section 5](https://tools.ietf.org/html/rfc3315#section-5), describes multicast groups used by DHCPv6. In [RFC 3315, section 5.3](https://tools.ietf.org/html/rfc3315#section-5.3), the types of messages seen in this multicast group. The messages are essentially a superset of similar messages used in IPv4 DHCP. [RFC 2131, page 15](https://tools.ietf.org/html/rfc2131#page-15), has an excellent overview of what the exchange between DHCP client and server look like in IPv4:
 
-```
+{{< highlight markdown>}}
 
                 Server          Client          Server
             (not selected)                    (selected)
@@ -222,7 +221,7 @@ In contrast, IPv6 supports multicast natively, and it is crucial to supporting p
                   v               v               v
      Figure 3: Timeline diagram of messages exchanged between DHCP
                client and servers when allocating a new network address
-```
+{{< / highlight >}}
 
 In this comparison, it is crucial to understand that the DHCPDISCOVER sent in IPv4 is a broadcast, and must be processed by every host on the subnet (even if only to discard). This is where IPv6 and multicast really shine. Because IPv6 hosts use multicast for DHCPv6, only hosts which have subscribed to the multicast group need to process DHCPv6 related messages. The process for a client obtaining an address is still very similar, but other devices on the segment do not need to handle the broadcast traffic of noisy neighbors.
 
@@ -244,7 +243,7 @@ Even the address scope reserved for multicast was chosen with efficiency in mind
 
 [RFC 4291, section 2](https://tools.ietf.org/html/rfc4291#section-2) explains the role of multicast in IPv6 in the very declarative terms that make RFCs such a terrific, authoritative resource:
 
-```
+{{< highlight markdown>}}
    Multicast: An identifier for a set of interfaces (typically
                belonging to different nodes).  A packet sent to a
                multicast address is delivered to all interfaces
@@ -252,7 +251,7 @@ Even the address scope reserved for multicast was chosen with efficiency in mind
 
    There are no broadcast addresses in IPv6, their function being
    superseded by multicast addresses.
-```
+{{< / highlight >}}
 
 ## Summary
 
