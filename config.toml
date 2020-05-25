@@ -1,6 +1,6 @@
 baseURL = "https://blog.csuttles.io"
-languageCode = "en-us"
-defaultContentLanguage = "en-US"
+languageCode = "en"
+defaultContentLanguage = "en"
 title = "blog.csuttles.io"
 theme = "dream"
 
