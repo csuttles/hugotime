@@ -26,7 +26,7 @@ aliases = ["/packet-captures-and-dns/"]
         for analysis. For those interested in focusing on tshark, <a href="#capture-and-save-with-tshark" >the following section</a> covers doing this same thing with tshark.
         You can skip ahead and leave tcpdump to the UNIX operating systems where it came from without missing anything.
         For those of you that see the value in tcpdump (a big plus is that it's everywhere), read on.</p>
-            <pre>sudo tcpdump -s0 -nnpi lo -w /tmp/lo-port-53.pcap 'port 53'</pre>
+<pre>sudo tcpdump -s0 -nnpi lo -w /tmp/lo-port-53.pcap 'port 53'</pre>
    <p><br />Let's step through this command and understand what it does.</p><pre>       <b>-s </b><u>snaplen</u>
        <b>--snapshot-length=</b><u>snaplen</u>
               Snarf  <u>snaplen</u>  bytes  of  data from each packet rather than the
@@ -41,19 +41,20 @@ aliases = ["/packet-captures-and-dns/"]
               Setting <u>snaplen</u> to 0 sets it to the default of 262144, for back‐
               wards compatibility with recent older versions of <u>tcpdump</u>.
 </pre>
-    <p>We use <code>-s0</code>&nbsp;to capture the full packet, regardless of tcpdump version (old versions
+<p>We use <code>-s0</code>&nbsp;to capture the full packet, regardless of tcpdump version (old versions
         used a much smaller default). It is also possible to set this much lower (i.e 512 for&nbsp;<b>most</b>        DNS traffic) to get smaller capture files; this can be very useful for long running captures
         to spot traffic patterns.</p>
-    <pre>       <b>-n </b>Don't  convert  host  addresses  to  names.  This can be used to
+<pre>
+  <b>-n </b>Don't  convert  host  addresses  to  names.  This can be used to
               avoid DNS lookups.
 
-       <b>-nn </b>Don't convert protocol and port numbers etc. to names either.
+  <b>-nn </b>Don't convert protocol and port numbers etc. to names either.
 </pre>
-   <p><br />We use <code>-nn</code>&nbsp;to prevent hostname and port/protocol name resolution at the time
+<p><br />We use <code>-nn</code>&nbsp;to prevent hostname and port/protocol name resolution at the time
         of capture. This can happen later when reviewing the pcap; doing so at the time of capture generates
         unneeded DNS traffic, and unnecessary overhead while capturing, which can cause packets to be
         dropped instead of captured at high traffic volumes.</p>
-   <pre>       <b>-p</b>
+<pre>       <b>-p</b>
    <b>--no-promiscuous-mode</b>
               <u>Don't</u>  put  the  interface into promiscuous mode.  Note that the
               interface might be in promiscuous mode for  some  other  reason;
