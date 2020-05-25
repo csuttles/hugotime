@@ -5,6 +5,7 @@ description = ""
 draft = true
 slug = "mitigation-vs-resolution"
 title = "Mitigation vs Resolution"
+aliases = ["/mitigation-vs-resolution/"]
 
 +++
 

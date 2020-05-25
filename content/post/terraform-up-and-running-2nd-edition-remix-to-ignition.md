@@ -5,6 +5,7 @@ description = ""
 draft = true
 slug = "terraform-up-and-running-2nd-edition-remix-to-ignition"
 title = "Terraform Up and Running (2nd edition)"
+aliases = ["/terraform-up-and-running-2nd-edition-remix-to-ignition/"]
 
 +++
 

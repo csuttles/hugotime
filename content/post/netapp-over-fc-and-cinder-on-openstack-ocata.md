@@ -8,6 +8,7 @@ cover = "/images/2017/09/Cinder_netapp_Setup-300x255.png"
 slug = "netapp-over-fc-and-cinder-on-openstack-ocata"
 tags = ["OpenStack", "Storage"]
 title = "NetApp over FC and Cinder on OpenStack Ocata"
+aliases = ["/netapp-over-fc-and-cinder-on-openstack-ocata/"]
 
 +++
 

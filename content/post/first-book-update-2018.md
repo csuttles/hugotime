@@ -8,6 +8,7 @@ cover = "/images/2018/02/best-bookstores-chicago-open-books.jpg"
 slug = "first-book-update-2018"
 tags = ["books"]
 title = "First Book Update 2018"
+aliases = ["/first-book-update-2018/"]
 
 +++
 

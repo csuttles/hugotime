@@ -8,6 +8,7 @@ cover = "/images/2019/05/Screen-Shot-2019-05-05-at-9.39.23-AM.png"
 slug = "wallabys-nightmare-1-02"
 tags = ["CTF", "vulnhub", "pentesting", "security", "BootToRoot", "offsec"]
 title = "Wallaby's: Nightmare (v1.0.2)"
+aliases = ["/wallabys-nightmare-1-02/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2020/03/Screen-Shot-2020-03-26-at-8.48.54-PM.png"
 slug = "forest"
 tags = ["CTF", "hackthebox", "offsec", "security", "kali", "metasploit"]
 title = "Forest"
+aliases = ["/forest/"]
 
 +++
 

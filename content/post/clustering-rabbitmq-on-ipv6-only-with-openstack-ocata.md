@@ -8,6 +8,7 @@ cover = "/images/2017/09/rabbitmq-clustering.jpg"
 slug = "clustering-rabbitmq-on-ipv6-only-with-openstack-ocata"
 tags = ["OpenStack", "IPv6", "availability"]
 title = "Clustering RabbitMQ on IPv6 with OpenStack Ocata"
+aliases = ["/clustering-rabbitmq-on-ipv6-only-with-openstack-ocata/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2017/09/sam-at-the-citadel.jpg"
 slug = "books-suggested-by-a-mentor-plus-one"
 tags = ["books"]
 title = "Books Suggested by a Mentor, Plus One"
+aliases = ["/books-suggested-by-a-mentor-plus-one/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2017/10/COMPUTER-REPAIR.jpg"
 slug = "troubleshooting-openstack"
 tags = ["OpenStack"]
 title = "Troubleshooting OpenStack"
+aliases = ["/troubleshooting-openstack/"]
 
 +++
 

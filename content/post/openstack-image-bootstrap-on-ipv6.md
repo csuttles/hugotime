@@ -8,6 +8,7 @@ cover = "/images/2017/09/glance.png"
 slug = "openstack-image-bootstrap-on-ipv6"
 tags = ["OpenStack", "IPv6"]
 title = "OpenStack image bootstrap on IPv6"
+aliases = ["/openstack-image-bootstrap-on-ipv6/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2018/01/Screen-Shot-2018-01-14-at-4.52.19-PM.png"
 slug = "100-days-of-code"
 tags = ["Python", "golang", "Java", "C", "automation"]
 title = "100 Days of Code"
+aliases = ["/100-days-of-code/"]
 
 +++
 

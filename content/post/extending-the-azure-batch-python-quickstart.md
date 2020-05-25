@@ -8,6 +8,7 @@ cover = "/images/2020/05/overview-of-the-azure-batch-workflow.png"
 slug = "extending-the-azure-batch-python-quickstart"
 tags = ["azure", "Python", "cloud", "batch", "exif", "gps", "automation"]
 title = "Extending the Azure Batch Python Quickstart"
+aliases = ["/extending-the-azure-batch-python-quickstart/"]
 
 +++
 

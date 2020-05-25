@@ -8,6 +8,7 @@ cover = "/images/2017/10/big-o-cheatsheet.jpg"
 slug = "python-flask-and-mongo"
 tags = ["Python", "Udemy"]
 title = "Python, Flask, and Mongo"
+aliases = ["/python-flask-and-mongo/"]
 
 +++
 

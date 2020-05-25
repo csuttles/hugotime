@@ -8,6 +8,7 @@ cover = "/images/2017/09/ipv6-ipv4.jpg"
 slug = "ocata-and-ipv6"
 tags = ["OpenStack", "IPv6"]
 title = "Ocata and IPv6"
+aliases = ["/ocata-and-ipv6/"]
 
 +++
 

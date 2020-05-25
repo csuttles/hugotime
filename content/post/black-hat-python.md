@@ -8,6 +8,7 @@ cover = "/images/2020/04/bhp.jpg"
 slug = "black-hat-python"
 tags = ["Python", "offsec", "security", "network", "pentesting", "tshark", "wireshark", "HTTP"]
 title = "Black Hat Python"
+aliases = ["/black-hat-python/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2018/01/Screen-Shot-2018-01-27-at-3.53.00-PM.png"
 slug = "a-brief-comparison-of-ipv4-and-ipv6"
 tags = ["IPv6", "IPv4", "network"]
 title = "A Brief Comparison of IPv4 and IPv6"
+aliases = ["/a-brief-comparison-of-ipv4-and-ipv6/"]
 
 +++
 

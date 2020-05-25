@@ -8,6 +8,7 @@ cover = "/images/2018/01/Screen-Shot-2018-01-03-at-1.14.50-AM.png"
 slug = "managing-ssh-secrets-with-vault"
 tags = ["vault", "secrets", "consul", "Docker", "containers"]
 title = "Managing SSH Secrets with Vault"
+aliases = ["/managing-ssh-secrets-with-vault/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2020/01/Screen-Shot-2020-01-10-at-10.19.47-PM.png"
 slug = "hackthebox"
 tags = ["pentesting", "CTF", "kali", "metasploit", "offsec"]
 title = "HackTheBox"
+aliases = ["/hackthebox/"]
 
 +++
 

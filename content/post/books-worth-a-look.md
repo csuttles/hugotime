@@ -8,6 +8,7 @@ cover = "/images/2017/09/vintage-books-wallpaper-desktop-picture.jpg"
 slug = "books-worth-a-look"
 tags = ["books"]
 title = "Books Worth a Look"
+aliases = ["/books-worth-a-look/"]
 
 +++
 

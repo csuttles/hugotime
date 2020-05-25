@@ -8,6 +8,7 @@ cover = "/images/2017/12/docker-jenkins.png"
 slug = "using-jenkins-and-aws-to-build-and-push-docker-images"
 tags = ["containers", "jenkins", "AWS", "Docker", "CI"]
 title = "Using Jenkins and AWS to Build and Push Docker Images"
+aliases = ["/using-jenkins-and-aws-to-build-and-push-docker-images/"]
 
 +++
 

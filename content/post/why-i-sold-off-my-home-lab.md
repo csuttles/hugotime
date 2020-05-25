@@ -6,6 +6,7 @@ draft = false
 cover = "/images/2018/09/homelab.jpg"
 slug = "why-i-sold-off-my-home-lab"
 title = "Why I sold off my home lab"
+aliases = ["/why-i-sold-off-my-home-lab/"]
 
 +++
 

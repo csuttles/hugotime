@@ -8,6 +8,7 @@ cover = "/images/2017/09/mariadb-galera.jpg"
 slug = "clustering-galera-on-single-stack-ipv6"
 tags = ["OpenStack", "IPv6"]
 title = "Clustering Galera on Single Stack IPv6"
+aliases = ["/clustering-galera-on-single-stack-ipv6/"]
 
 +++
 

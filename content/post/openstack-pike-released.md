@@ -8,6 +8,7 @@ cover = "/images/2017/09/openstack-pike.jpg"
 slug = "openstack-pike-released"
 tags = ["OpenStack"]
 title = "OpenStack Pike Released"
+aliases = ["/openstack-pike-released/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2018/12/logo_cka.png"
 slug = "certified-kubernetes-administrator"
 tags = ["kubernetes", "certification", "CNCF", "containers", "Docker"]
 title = "Certified Kubernetes Administrator"
+aliases = ["/certified-kubernetes-administrator/"]
 
 +++
 

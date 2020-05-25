@@ -8,6 +8,7 @@ cover = "/images/2017/09/openstack-kolla.jpeg"
 slug = "building-openstack-containers-with-kolla"
 tags = ["OpenStack", "containers"]
 title = "Building OpenStack Containers with Kolla"
+aliases = ["/building-openstack-containers-with-kolla/"]
 
 +++
 

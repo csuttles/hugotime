@@ -8,6 +8,7 @@ cover = "/images/2019/05/wireshark-logo.jpg"
 slug = "packet-captures-and-dns"
 tags = ["DNS", "pcap", "wireshark", "tshark", "tcpdump", "network"]
 title = "Packet Captures and DNS"
+aliases = ["/packet-captures-and-dns/"]
 
 +++
 
@@ -222,6 +223,7 @@ title = "Packet Captures and DNS"
     <ul>
         <li><a class="attachment" href="https://wiki.wireshark.org/SampleCaptures?action=AttachFile&amp;do=get&amp;target=dhcp-and-dyndns.pcap.gz"
                 title="">dhcp-and-dyndns.pcap.gz</a> <span >&nbsp;(libpcap) A sample session of a host doing dhcp first and then dyndns.</span></li>
+aliases = ["/packet-captures-and-dns/"]
         <li><span ><a title="" href="https://wiki.wireshark.org/SampleCaptures?action=AttachFile&amp;do=get&amp;target=dns.cap" class="attachment">dns.cap</a><span >&nbsp;(libpcap) Various DNS lookups.</span><br
             /></span>
         </li>

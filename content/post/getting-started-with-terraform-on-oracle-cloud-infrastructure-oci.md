@@ -8,6 +8,7 @@ cover = "/images/2018/10/Screen-Shot-2018-10-09-at-1.17.31-PM.png"
 slug = "getting-started-with-terraform-on-oracle-cloud-infrastructure-oci"
 tags = ["cloud", "OCI", "Getting Started", "terraform"]
 title = "Getting Started with Terraform on Oracle Cloud Infrastructure (OCI)"
+aliases = ["/getting-started-with-terraform-on-oracle-cloud-infrastructure-oci/"]
 
 +++
 

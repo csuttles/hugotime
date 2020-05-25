@@ -8,6 +8,7 @@ cover = "/images/2017/09/OpenStack_logo.png"
 slug = "getting-started-with-openstack"
 tags = ["Getting Started", "OpenStack"]
 title = "Getting started with OpenStack"
+aliases = ["/getting-started-with-openstack/"]
 
 +++
 

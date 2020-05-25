@@ -8,6 +8,7 @@ cover = "/images/2017/12/Screen-Shot-2017-12-13-at-10.06.03-PM.png"
 slug = "fnproject-and-open-source-faas"
 tags = ["serverless", "faas"]
 title = "Fn Project and Open Source FaaS"
+aliases = ["/fnproject-and-open-source-faas/"]
 
 +++
 
