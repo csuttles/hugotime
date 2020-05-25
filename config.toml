@@ -1,6 +1,6 @@
 baseURL = "https://blog.ctlfish.org"
-languageCode = "en"
-defaultContentLanguage = "en"
+languageCode = "en-us"
+defaultContentLanguage = "en-US"
 title = "blog.csuttles.io"
 theme = "dream"
 
