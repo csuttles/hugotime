@@ -24,11 +24,11 @@ One of the issues I ran into was with running the registry. By default, Docker w
 
 I also had some port conflicts, so I ended up customizing some of the build config. Most of my options are defaults, but some of the ones I needed to add to `/etc/kolla/globals.yml` included:
 
-```
+{{< highlight markdown >}}
 horizon_port: "8080"
 database_port: 3307
 enable_haproxy: "no"
-```
+{{< / highlight >}}
 
 Once those changes were in place, and I got my kolla-build done, I was on my way. I ended up passing a few flags not in the quickstart guide to be more explicit and speed things up: `kolla-build --tag 5.0.0.0b3 --cache -t binary`. [This page](https://releases.openstack.org/teams/kolla.html) was indispensible in mapping the Kolla tags to the actual OpenStack release I wanted to build.
 

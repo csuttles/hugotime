@@ -14,16 +14,16 @@ title = "Limiting Access in Security Groups"
 
 Here's a very quick, practical example why it is important to limit access in AWS security groups for your bastion hosts (jump hosts). 
 
-```
+{{< highlight markdown >}}
 sudo grep -oP '(?:\d+\.){3}\d+' -h /var/log/secure* | sort |uniq -c | sort -n | awk '{sum +=$1 ; count ++} END {print sum, count}'
 65546 1680
-```
+{{< / highlight >}}
 
 This is a sum of log lines (auth attempts) per IPv4 address and count of unique IPv4 addresses in /var/log/secure* from an instance with SSH open to the world.
 
 Let's step through this. This is what the matched lines look like, here's the (truncated/sanitized) output of `sudo grep -P '(?:\d+\.){3}\d+'  /var/log/secure*`
 
-```
+{{< highlight markdown >}}
 /var/log/secure-20171001:Sep 24 22:27:20 ip-86-75-30-9 sshd[30310]: Address 185.82.216.241 maps to vds-vektort13-89700.itldc-customer.net, but this does not map back to the address - POSSIBLE BREAK-IN ATTEMPT!
 /var/log/secure-20171001:Sep 24 22:27:20 ip-86-75-30-9 sshd[30310]: Invalid user admin from 185.82.216.241 port 58118
 /var/log/secure-20171001:Sep 24 22:27:20 ip-86-75-30-9 sshd[30310]: Connection closed by 185.82.216.241 port 58118 [preauth]
@@ -34,7 +34,7 @@ Let's step through this. This is what the matched lines look like, here's the (t
 /var/log/secure-20171001:Sep 25 01:48:47 ip-86-75-30-9 sshd[32407]: Received disconnect from 191.96.249.156 port 58456:11: Bye Bye [preauth]
 /var/log/secure-20171001:Sep 25 01:48:47 ip-86-75-30-9 sshd[32407]: Disconnected from 191.96.249.156 port 58456 [preauth]
 /var/log/secure-20171001:Sep 25 01:48:49 ip-86-75-30-9 sshd[32409]: Invalid user ubnt from 191.96.249.156 port 37724
-```
+{{< / highlight >}}
 
 Clearly, script kiddies are scanning and jamming with brute force. If they had done any footprinting, they would not be trying to log in as admin or ubnt. 
 
@@ -44,7 +44,7 @@ So that's what our lines look like, then we add the `-o` option to grep so we ca
 
 This is what things look like so far. I added a `|tail` so we can see the top offenders from the interactive output:
 
-```
+{{< highlight markdown >}}
 sudo grep -oP '(?:\d+\.){3}\d+' -h /var/log/secure* | sort |uniq -c | sort -n | tail
     998 198.98.57.188
    1012 185.165.29.82
@@ -56,13 +56,13 @@ sudo grep -oP '(?:\d+\.){3}\d+' -h /var/log/secure* | sort |uniq -c | sort -n | 
    3901 202.112.23.245
    7343 198.98.62.121
   15308 61.255.108.136
- ```
+ {{< / highlight >}}
  
 These are IPv4 adresses from people/bots/attackers trying to breach my instance.
 
 Let's use `whois` to find out more about the top attacker:
 
-```
+{{< highlight markdown >}}
 whois 61.255.108.136
 [Querying whois.apnic.net]
 [Redirected to whois.krnic.net]
@@ -155,7 +155,7 @@ E-Mail             : bbb@aaa.com
 
 
 - KISA/KRNIC WHOIS Service -
-```
+{{< / highlight >}}
 
 I'm probably never going to log in from Korea. If I ever find myself in Korea, it's likely I would be using a VPN anyway, so I feel pretty comfortable with blocking the range of this attacker. We'll get to that part later.
 

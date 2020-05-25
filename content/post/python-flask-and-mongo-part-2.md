@@ -28,7 +28,7 @@ While I do agree that HTTPS should be used whenever possible, when it comes to s
 
 I ended up using the CryptoJS library for client side hashing, which can be found [here](https://code.google.com/archive/p/crypto-js/). It's pretty old, and in the longer term, it might be better to move to a more active project, like [Forge](https://github.com/digitalbazaar/forge), but it's still better than no hashing at all. I grabbed [just sha512 from the distribution](https://github.com/csuttles/udemy-python-webapps/blob/master/pricealert/src/static/js/sha512.js), and [added a simple function](https://github.com/csuttles/udemy-python-webapps/blob/master/pricealert/src/templates/html_dependencies.html#L7-L17) to generate the hashes in the [login](https://github.com/csuttles/udemy-python-webapps/blob/master/pricealert/src/templates/users/login.html#L6) and [register](https://github.com/csuttles/udemy-python-webapps/blob/master/pricealert/src/templates/users/register.html#L6) forms:
 
-```
+{{< highlight markdown >}}
 <script type="text/javascript">function myOnSubmit(aForm) {
     //Getting the password objects
     var inputPassword = aForm['hashed'];
@@ -37,7 +37,7 @@ I ended up using the CryptoJS library for client side hashing, which can be foun
     //Submitting
     return true;
 }</script>
-```
+{{< / highlight >}}
 
 While this is very basic web app hygiene stuff, it's not what I usually do, and it's different from the course material. There's still a lot of work to be done on this app in terms of making it more secure, and I'm looking at using [WTForms](https://wtforms.readthedocs.io/en/latest/validators.html) and [Flask Inputs](https://pythonhosted.org/Flask-Inputs/) for validation, since input validation is glaring omission from the current state. It's important to sanitize and validate user input:
 
@@ -58,7 +58,7 @@ The course also used Bootstrap 3 glyphicons, which are no longer part of Bootstr
 
 Aside from all the window dressing, I found a problem with the parsing in the `Item.load_price()` [method](https://github.com/csuttles/udemy-python-webapps/blob/master/pricealert/src/models/items/item.py#L27-L43). The small, but important change is visible in the commented assignment of `string_price` below:
 
-```
+{{< highlight markdown >}}
     def load_price(self):
         # https://www.redbubble.com/people/immortalloom/works/22929408-official-big-o-cheat-sheet-poster?p=poster&finish=semi_gloss&size=large
         #         <meta itemprop="price" content="32.66"/>
@@ -76,7 +76,7 @@ Aside from all the window dressing, I found a problem with the parsing in the `I
         match = re.search(pattern, string_price)
         self.price = float(match.group())
         return self.price
- ```
+ {{< / highlight >}}
  
 The first comment is an example item URL, and the tag and query that are ultimately passed to BeautifulSoup's HTML parser. I found that while this worked for the example item, a different site, with a price found by the same tag and query would become an empty string after the `element.text.strip` statement. Replacing this with a simple type cast allowed both the example seen above and the other site where I discovered the problem to work successfully. I have no doubt that more improvement can be made here.
 

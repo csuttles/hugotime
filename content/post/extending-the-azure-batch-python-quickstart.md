@@ -44,7 +44,7 @@ Here's the end result of this little example, where we essentially wrote two lin
 
 Two lines of input can do a lot! What else can you do with two lines?
 
-```
+{{< highlight markdown >}}
 csuttles@jabroni:[~/src/csuttles-batch-python-quickstart/src]:(master *%)
 [Exit: 0] 11:05: python python_quickstart_client.py
 Sample start: 2020-05-22 11:05:23
@@ -144,7 +144,7 @@ Delete pool? [Y/n]
 Deleting container [input1]...
 
 Press ENTER to exit...
-```
+{{< / highlight >}}
 
 
 

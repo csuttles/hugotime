@@ -29,15 +29,15 @@ Check out the [Rally docs](http://docs.xrally.xyz/projects/openstack/en/latest/)
 This is all covered well in the quick start guide, so I am going to be brief. You start by adding a deployment, and then you can test just about anything you like. The task  definitions are very felxible and customizable, and the sample configurations are very helpful as a starting point for both understanding the framework, and customizing it to your needs. A basic test might be something like this:
 
 ##### Install
-```
+{{< highlight markdown >}}
 curl https://raw.githubusercontent.com/openstack/rally/master/install_rally.sh | bash
-```
+{{< / highlight >}}
 
 _disclaimer: I always break this into steps. Download, read, then execute. This is a copypasta from the docs._
 
 ##### Configure
 
-```
+{{< highlight markdown >}}
 source openrc
 rally deployment create --fromenv --name=braaap
 ...
@@ -46,11 +46,11 @@ rally deployment create --fromenv --name=braaap
 +--------------------------------------+---------------------+--------+------------------+--------+
 | 1f102242-37db-419e-accf-db485cf3be25 | 2017-09-06T06:39:30 | braaap | deploy->finished |        |
 +--------------------------------------+---------------------+--------+------------------+--------+
-```
+{{< / highlight >}}
 
 ##### Sanity Check
 
-```
+{{< highlight markdown >}}
 rally deployment check
 --------------------------------------------------------------------------------
 Platform openstack:
@@ -68,7 +68,7 @@ Available services:
 | neutron     | network        | Available |
 | nova        | compute        | Available |
 +-------------+----------------+-----------+
-```
+{{< / highlight >}}
 
 ##### Run a Task
 
@@ -80,7 +80,7 @@ In my case, I had to edit the image name to match my avaiable cirros test image.
 
 Run the Task:
 
-```
+{{< highlight markdown >}}
 rally task start samples/tasks/scenarios/nova/boot-and-delete.json
 --------------------------------------------------------------------------------
 Preparing input task
@@ -117,11 +117,11 @@ Task is:
             }
         },
         ...
-  ```
+  {{< / highlight >}}
         
 ##### Check the Results!
 
-```
+{{< highlight markdown >}}
 --------------------------------------------------------------------------------
 Task ed76acf4-5685-4b7c-864d-6bffe0c9d7bb has 0 error(s)
 --------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ HINTS:
 
 * To get raw JSON output of task results, run:
         rally task results ed76acf4-5685-4b7c-864d-6bffe0c9d7bb
-```
+{{< / highlight >}}
 
 This is really only scratching the surface of what you can do with Rally, but I think it is easy to see the power of this tool. Enjoy!
 

