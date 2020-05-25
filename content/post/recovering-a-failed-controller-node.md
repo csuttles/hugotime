@@ -8,6 +8,7 @@ cover = "/images/2017/08/operation-3.jpg"
 slug = "recovering-a-failed-controller-node"
 tags = ["OpenStack"]
 title = "Recovering a Failed Controller Node"
+aliases = ["/recovering-a-failed-controller-node/"]
 
 +++
 

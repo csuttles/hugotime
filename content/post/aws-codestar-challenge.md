@@ -8,6 +8,7 @@ cover = "/images/2017/09/codestar-example-dashboard.png"
 slug = "aws-codestar-challenge"
 tags = ["AWS", "automation", "Python"]
 title = "AWS CodeStar Challenge"
+aliases = ["/aws-codestar-challenge/"]
 
 +++
 

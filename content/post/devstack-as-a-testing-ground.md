@@ -8,6 +8,7 @@ cover = "/images/2017/09/devstack2.png"
 slug = "devstack-as-a-testing-ground"
 tags = ["OpenStack"]
 title = "Devstack as a testing ground"
+aliases = ["/devstack-as-a-testing-ground/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2017/09/aws-Developer-Associate.jpg"
 slug = "aws-certified-developer-associate"
 tags = ["AWS"]
 title = "AWS Certified Developer – Associate"
+aliases = ["/aws-certified-developer-associate/"]
 
 +++
 

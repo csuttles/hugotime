@@ -8,6 +8,7 @@ cover = "/images/2018/11/2018-11-29_22-39-05.png"
 slug = "penetration-testing-for-newbies"
 tags = ["pentesting", "security", "metasploit", "kali", "Getting Started"]
 title = "Penetration Testing for Newbies"
+aliases = ["/penetration-testing-for-newbies/"]
 
 +++
 

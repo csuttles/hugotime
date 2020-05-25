@@ -8,6 +8,7 @@ cover = "/images/2017/09/openstack-ocata-cells.jpg"
 slug = "placement-api-and-cells-in-ocata"
 tags = ["OpenStack"]
 title = "Placement API and Cells in Ocata"
+aliases = ["/placement-api-and-cells-in-ocata/"]
 
 +++
 

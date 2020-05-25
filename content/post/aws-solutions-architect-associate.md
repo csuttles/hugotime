@@ -8,6 +8,7 @@ cover = "/images/2017/09/aws-certified-solutions-architect-associate.jpg"
 slug = "aws-solutions-architect-associate"
 tags = ["AWS"]
 title = "AWS Certified Solutions Architect - Associate"
+aliases = ["/aws-solutions-architect-associate/"]
 
 +++
 

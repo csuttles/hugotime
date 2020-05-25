@@ -8,6 +8,7 @@ cover = "/images/2017/09/openstack-availability-zones.jpg"
 slug = "deploying-openstack-availability-zones"
 tags = ["OpenStack"]
 title = "Deploying OpenStack Availability Zones"
+aliases = ["/deploying-openstack-availability-zones/"]
 
 +++
 

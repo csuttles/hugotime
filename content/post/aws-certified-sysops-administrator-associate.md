@@ -8,6 +8,7 @@ cover = "/images/2017/11/aws-certified-sysops-adminstrator-associate-croma-campu
 slug = "aws-certified-sysops-administrator-associate"
 tags = ["AWS"]
 title = "AWS Certified SysOps Administrator – Associate"
+aliases = ["/aws-certified-sysops-administrator-associate/"]
 
 +++
 

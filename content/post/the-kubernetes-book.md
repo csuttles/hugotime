@@ -8,6 +8,7 @@ cover = "/images/2017/11/Screen-Shot-2017-11-12-at-6.22.27-PM.png"
 slug = "the-kubernetes-book"
 tags = ["kubernetes", "books", "containers"]
 title = "The Kubernetes Book"
+aliases = ["/the-kubernetes-book/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2019/04/HackInOS-00.png"
 slug = "hackinos-boot-to-root"
 tags = ["pentesting", "metasploit", "CTF", "BootToRoot", "security", "vulnhub"]
 title = "HackInOS Boot to Root"
+aliases = ["/hackinos-boot-to-root/"]
 
 +++
 

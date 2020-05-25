@@ -8,6 +8,7 @@ cover = "/images/2017/09/nomad-logo.jpg"
 slug = "preparing-to-run-openstack-in-nomad"
 tags = ["OpenStack", "containers"]
 title = "Preparing to Run OpenStack in Nomad"
+aliases = ["/preparing-to-run-openstack-in-nomad/"]
 
 +++
 

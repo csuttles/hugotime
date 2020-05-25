@@ -8,6 +8,7 @@ cover = "/images/2018/12/golang-debug-1.png"
 slug = "troubleshooting-a-slow-client"
 tags = ["golang", "AWS", "IPv6", "IPv4", "network", "HTTP", "API"]
 title = "Troubleshooting a Slow API Client in Golang"
+aliases = ["/troubleshooting-a-slow-client/"]
 
 +++
 

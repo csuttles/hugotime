@@ -8,6 +8,7 @@ cover = "/images/2017/10/scenario-1-sg-inbound-gwt.png"
 slug = "limiting-access-in-security-groups"
 tags = ["AWS"]
 title = "Limiting Access in Security Groups"
+aliases = ["/limiting-access-in-security-groups/"]
 
 +++
 

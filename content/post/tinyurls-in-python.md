@@ -5,6 +5,7 @@ description = ""
 draft = true
 slug = "tinyurls-in-python"
 title = "TinyURLs in Python"
+aliases = ["/tinyurls-in-python/"]
 
 +++
 

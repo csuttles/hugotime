@@ -8,6 +8,7 @@ cover = "/images/2018/11/Screen-Shot-2018-10-09-at-1.17.31-PM-1.png"
 slug = "building-hashicorp-vault-in-oci-part-iii"
 tags = ["OCI", "terraform", "consul", "vault", "cloud", "automation"]
 title = "Building Hashicorp Vault in OCI - Part III"
+aliases = ["/building-hashicorp-vault-in-oci-part-iii/"]
 
 +++
 

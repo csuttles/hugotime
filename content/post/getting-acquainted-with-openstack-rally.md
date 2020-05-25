@@ -8,6 +8,7 @@ cover = "/images/2017/09/openstack-rally.jpg"
 slug = "getting-acquainted-with-openstack-rally"
 tags = ["OpenStack", "automation"]
 title = "Getting Acquainted with OpenStack Rally"
+aliases = ["/getting-acquainted-with-openstack-rally/"]
 
 +++
 

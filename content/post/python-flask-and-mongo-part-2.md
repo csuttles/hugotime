@@ -8,6 +8,7 @@ cover = "/images/2017/10/Screen-Shot-2017-10-14-at-5.16.25-PM.png"
 slug = "python-flask-and-mongo-part-2"
 tags = ["Python", "Udemy"]
 title = "Python, Flask, and Mongo, Part 2"
+aliases = ["/python-flask-and-mongo-part-2/"]
 
 +++
 

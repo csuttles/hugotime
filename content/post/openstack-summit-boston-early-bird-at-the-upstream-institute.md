@@ -8,6 +8,7 @@ cover = "/images/2017/09/openstack-summit-boston-6.jpeg"
 slug = "openstack-summit-boston-early-bird-at-the-upstream-institute"
 tags = ["OpenStack", "Python", "automation", "summit"]
 title = "OpenStack Summit Boston - Upstream Institute"
+aliases = ["/openstack-summit-boston-early-bird-at-the-upstream-institute/"]
 
 +++
 

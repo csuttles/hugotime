@@ -8,6 +8,7 @@ cover = "/images/2018/01/Screen-Shot-2018-01-07-at-1.14.27-PM.png"
 slug = "managing-dynamic-database-credentials-with-hashicorp-vault-and-chef"
 tags = ["vault", "chef", "secrets", "automation", "Python", "consul"]
 title = "Managing Dynamic Database Credentials With Hashicorp Vault and Chef"
+aliases = ["/managing-dynamic-database-credentials-with-hashicorp-vault-and-chef/"]
 
 +++
 

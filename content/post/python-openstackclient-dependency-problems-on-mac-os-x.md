@@ -8,6 +8,7 @@ cover = "https://imgs.xkcd.com/comics/dependencies.png"
 slug = "python-openstackclient-dependency-problems-on-mac-os-x"
 tags = ["OpenStack", "Python"]
 title = "Python-OpenStackclient Dependency Problems on MacOS"
+aliases = ["/python-openstackclient-dependency-problems-on-mac-os-x/"]
 
 +++
 

@@ -8,6 +8,7 @@ cover = "/images/2019/05/Screen-Shot-2019-05-06-at-10.53.48-PM.png"
 slug = "derpnstink-1"
 tags = ["pentesting", "CTF", "vulnhub", "offsec", "security", "BootToRoot"]
 title = "DerpNStink: 1"
+aliases = ["/derpnstink-1/"]
 
 +++
 

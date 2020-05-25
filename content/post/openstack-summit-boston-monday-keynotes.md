@@ -8,6 +8,7 @@ cover = "/images/2017/09/openstack-summit-boston-7.jpeg"
 slug = "openstack-summit-boston-monday-keynotes"
 tags = ["OpenStack", "summit"]
 title = "OpenStack Summit Boston - Monday Keynotes"
+aliases = ["/openstack-summit-boston-monday-keynotes/"]
 
 +++
 
