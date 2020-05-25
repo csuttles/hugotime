@@ -35,7 +35,7 @@ There's an atrocious method implementation for searching mongo for a matching st
 
 Here's the example code:
 
-```
+{{< highlight markdown >}}
 @classmethod
 def find_by_url(cls, url):
     for i in range(0, len(url) + 1):
@@ -45,12 +45,12 @@ def find_by_url(cls, url):
             raise StoreErrors.StorenotFoundException(
                 "The URL prefix used to find the store didn't give us any results.")
         return store
-```
+{{< / highlight >}}
 
 
 Here's some small changes I made to make it less awful:
 
-```
+{{< highlight markdown >}}
 @classmethod
 def find_by_url(cls, url):
     """
@@ -68,11 +68,11 @@ def find_by_url(cls, url):
             raise StoreErrors.StorenotFoundException(
                 "The URL prefix used to find the store didn't give us any results.")
         return store
-```
+{{< / highlight >}}
 
 For completeness/convenience sake, here's the get_by_url_prefix method being called:
 
-```
+{{< highlight markdown >}}
 @classmethod
 def get_by_url_prefix(cls, url_prefix):
     """
@@ -80,7 +80,7 @@ def get_by_url_prefix(cls, url_prefix):
     :return: return store that startswith url_prefix: url_prefix
     """
     return cls(**Database.find_one(StoreConstants.COLLECTION, {"url_prefix": {"$regex": '^{}'.format(url_prefix)}}))
-```
+{{< / highlight >}}
 
 I'm not quite done with this application, but the core of the Python work is complete. I tested an alert using test data from [this page](https://www.redbubble.com/people/immortalloom/works/22929408-official-big-o-cheat-sheet-poster?p=poster&finish=semi_gloss&size=large) on Redbubble, which is a [Big-O cheatsheet](http://bigocheatsheet.com/) poster. The example test data in the course points to an item that is no longer sold and therefore doesn't work. There's also a big chunk of the course that discusses parsing using amazon as an example, and ends with something like "this won't work because Amazon is too smart and you have to use their API". 
 

@@ -24,7 +24,7 @@ This post is the last in a series on deploying the [Hashicorp recommended archit
 
 In the previous articles in the series, we built out prerequisite resources, including compartments, a VCN, subnets, seclists, and finally consul servers. After doing all of that, adding Hashicorp Vault is pretty simple.Let's take a look at our `vault.tf` file:
 
-```
+{{< highlight markdown >}}
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 23:13: cat vault.tf
 //vault nodes
@@ -75,11 +75,11 @@ output "vault_instances" {
 output "vault_instance_public_ips" {
  value = ["${oci_core_instance.vault.*.public_ip}"]
 }
-```
+{{< / highlight >}}
 
 It's ridiculously similar to the consul file:
 
-```
+{{< highlight markdown >}}
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 2] 23:16: diff -U 0 consul.tf vault.tf
 --- consul.tf	2018-11-05 20:21:48.000000000 -0600
@@ -116,7 +116,7 @@ csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 - value = ["${oci_core_instance.consul.*.public_ip}"]
 +output "vault_instance_public_ips" {
 + value = ["${oci_core_instance.vault.*.public_ip}"]
-```
+{{< / highlight >}}
 
 So we can basically `s/consul/vault/g` and call it done? Almost
 
@@ -124,7 +124,7 @@ So we can basically `s/consul/vault/g` and call it done? Almost
 
 We're going to leverage more of what we have already done, which will speed things up quite a bit, but we do need to add some things. Based on the [recommended architecture](https://learn.hashicorp.com/vault/operations/ops-reference-architecture#deployment-topology-within-one-datacenter)[,] we need to build 3 Vault boxes in 3 Availability Domains, but they also need Consul running in client mode locally. We'll take our previous `cloud-config-data` and refactor it a little to get the job done. It ends up looking like this:
 
-```
+{{< highlight markdown >}}
 [Exit: 1] 23:21: cat user-data/vault.txt
 #cloud-config
 # vim: syntax=yaml:ts=4:sw=4:expandtab
@@ -240,11 +240,11 @@ runcmd:
  - systemctl enable vault
  - systemctl start vault
  - systemctl status vault
-```
+{{< / highlight >}}
 
 Again, we've embedded config files in base64, but we can re-use several constructs, like users, group, and runcmd to make things a little easier.Here's what the plaintext versions of the relevant files look like:vault.hcl
 
-```
+{{< highlight markdown >}}
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 23:22: cat user-data/vault.hcl
 storage "consul" {
@@ -256,22 +256,22 @@ listener "tcp" {
  address     = "0.0.0.0:8200"
  tls_disable = 1
 }
-```
+{{< / highlight >}}
 
 consul.hcl (stored in git as consul-client.hcl)
 
-```
+{{< highlight markdown >}}
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 23:22: cat user-data/consul-client.hcl
 datacenter = "dc1"
 data_dir = "/opt/consul"
 encrypt = "Luj2FZWwlt8475wD1WtwUQ=="
 retry_join = ["consul-0.vault1.ocivault.oraclevcn.com", "consul-1.vault1.ocivault.oraclevcn.com", "consul-2.vault2.ocivault.oraclevcn.com", "consul-3.vault3.ocivault.oraclevcn.com", "consul-4.vault3.ocivault.oraclevcn.com"]
-```
+{{< / highlight >}}
 
 vault.service
 
-```
+{{< highlight markdown >}}
 csuttles@cs-mbp15:[~/src/oci-vault/iad/vault]:(master)
 [Exit: 0] 23:23: cat user-data/vault.service
 [Unit]
@@ -291,13 +291,13 @@ KillSignal=SIGINT
 
 [Install]
 WantedBy=multi-user.target
-```
+{{< / highlight >}}
 
 ## Deploying
 
 Again, we run a simple `terraform plan && terraform apply`, and then check the results. After building the nodes with terraform, I connected to the node `vault-0` to check the status. I started by checking consul:
 
-```
+{{< highlight markdown >}}
 [root@vault-0 ~]# consul members
 Node      Address         Status  Type    Build  Protocol  DC   Segment
 consul-0  10.0.1.36:8301  alive   server  1.3.0  2         dc1  <all>
@@ -308,11 +308,11 @@ consul-4  10.0.3.37:8301  alive   server  1.3.0  2         dc1  <all>
 vault-0   10.0.1.37:8301  alive   client  1.3.0  2         dc1  <default>
 vault-1   10.0.2.19:8301  alive   client  1.3.0  2         dc1  <default>
 vault-2   10.0.3.36:8301  alive   client  1.3.0  2         dc1  <default>
-```
+{{< / highlight >}}
 
 While we deployed the recommended architecture, I left TLS disabled in the config, so we have to tell vault client not to connect with it. Hardening and load balancing are going to be left to the reader.
 
-```
+{{< highlight markdown >}}
 [root@vault-0 ~]# export VAULT_ADDR=http://127.0.0.1:8200
 [root@vault-0 ~]# vault operator init
 Unseal Key 1: YIOO/aCZk1EUGTAUxixpMZ8Q1nGNGnyS8vTmaWcSyyyN
@@ -345,11 +345,11 @@ Unseal Progress    0/3
 Unseal Nonce       n/a
 Version            0.11.5
 HA Enabled         true
-```
+{{< / highlight >}}
 
 We can see that initializing Vault was successful, but it is still sealed. Next we will unseal it and verify the status.
 
-```
+{{< highlight markdown >}}
 [root@vault-0 ~]# vault operator unseal
 Unseal Key (will be hidden):
 Key                Value
@@ -406,13 +406,13 @@ Cluster ID      08e0e128-c0e6-032c-4688-f21b585e7910
 HA Enabled      true
 HA Cluster      https://10.0.1.37:8201
 HA Mode         active
-```
+{{< / highlight >}}
 
 ## First Secrets
 
 Now that we have a Vault cluster up and running, it is of course time for some secrets! What demo would be complete without a `hello world`?
 
-```
+{{< highlight markdown >}}
 [root@vault-0 ~]# vault login
 Token (will be hidden):
 Success! You are now authenticated. The token information displayed below
@@ -436,7 +436,7 @@ Key        Value
 ---        -----
 excited    yes
 foo        world
-```
+{{< / highlight >}}
 
 Of course there are many more possibilities beyond `hello world`. You can [manage SSH secrets](http://blog.csuttles.io/managing-ssh-secrets-with-vault/), and [dynamic database credentials](http://blog.csuttles.io/managing-dynamic-database-credentials-with-hashicorp-vault-and-chef/) (among other things).If you've read through this article, or better yet, the entire series, I want to thank you for reading. If you have any suggestions on things you'd like to see me write about, or how I can improve posts like this, please reach out to me via LinkedIn or Twitter and let me know. Pull requests for this repo are also welcome!
 

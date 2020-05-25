@@ -36,9 +36,9 @@ The CI pipeline built in this post is something like this:
 
 I started out running my local Jenkins master by running the following command on one of my lab machines which is already running Docker:
 
-```
+{{< highlight markdown >}}
 docker run --name jenkins -d -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
-```
+{{< / highlight >}}
 
 I grabbed the administrator password from the logs, logged in and ran through the installation wizard. You can see more details and screenshots of that part in the blog posts mentioned earlier. I installed the recommended plugins, the 'Green Balls' plugin, and also the one that I will focus on in this post: 
 
@@ -52,13 +52,13 @@ I used the `us-west-2` region for this, so I used the following AMI and initscri
 
 * AMI: `ami-bf4193c7`
 * INIT:
-```
+{{< highlight markdown >}}
 sudo yum update -y
 sudo yum install -y docker git java-1.8.0-openjdk
 sudo service docker start
 sudo usermod -a -G docker ec2-user
 sudo alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
-```
+{{< / highlight >}}
 
 The remainder of the configuration is pretty self explanatory and is also covered in more detail in the [How To Build Docker Images Automatically With Jenkins Pipeline](https://blog.nimbleci.com/2016/08/31/how-to-build-docker-images-automatically-with-jenkins-pipeline/) blog post. You start by adding a cloud of type "Amazon EC2", and configure credentials and other options. I mention the region, AMI and init script since I used Amazon Linux, and AMIs are region specific. I also found it useful to disable instance termination while troubleshooting, and I experienced errors with the plugin until I selected the `Connect by SSH Process` in advanced options. I also configured only a single executor to avoid spinning up too many instances in EC2.
 
@@ -69,7 +69,7 @@ With AWS configured, I had to do the job configuration, and make some changes to
 
 At the time of pusblishing this post, the Jenkinsfile looks like this:
 
-```
+{{< highlight markdown >}}
 node {
     def app
 
@@ -116,7 +116,7 @@ node('docker') {
         }
     }
 }
-```
+{{< / highlight >}}
 
 You can find the current version [in my github repository](https://github.com/csuttles/dockerci/blob/master/Jenkinsfile). Let's take a look at what is happening here.
 

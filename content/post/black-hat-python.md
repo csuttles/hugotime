@@ -70,10 +70,10 @@ Pic Carver1. first step of this is parsing the pcap with scapy, which is easy en
 
 The say a picture is worth a thousand words so here we go.
 
-```bash
+{{< highlight markdown >}}bash
 writing facial recognition edited image to: ./faces/bigface.pcap-pic_carver_face_50.jpeg
 writing original image to: ./pictures/bigface.pcap-pic_carver_50.jpeg
-```
+{{< / highlight >}}
 
 {{< figure src="/content/images/2020/04/bigface.pcap-pic_carver_50.jpeg" caption="image extracted from pcap" >}}
 

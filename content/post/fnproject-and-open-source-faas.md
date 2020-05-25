@@ -34,16 +34,16 @@ The talk sparked my interest. I decided to run through the quickstart and a few 
 
 I had most of the prerequisites, so I did:
 
-```
+{{< highlight markdown >}}
 brew install fn
 fn start
 mkdir -p fnproject/hello
 cd $!
-```
+{{< / highlight >}}
 
 Then I created a simple golang program based on the docs with this content, named `func.go`:
 
-```
+{{< highlight markdown >}}
 package main
 
 import (
@@ -53,30 +53,30 @@ import (
 func main() {
   fmt.Println("Hello from Fn!")
 }
-```
+{{< / highlight >}}
 
 Next I ran:
 
-```
+{{< highlight markdown >}}
 fn init
 export FN_REGISTRY=<my docker registry>
 fn run
 fn deploy --app myapp
-```
+{{< / highlight >}}
 
 Then I was calling my function (func.go) with:
 
-```
+{{< highlight markdown >}}
 curl http://localhost:8080/r/myapp/hello
 # or:
 fn call myapp /hello
-```
+{{< / highlight >}}
 
 There's also a built in dashboard, which was easily launched with:
 
-```
+{{< highlight markdown >}}
 docker run --rm -it --link fnserver:api -p 4000:4000 -e "FN_API_URL=http://api:8080" fnproject/ui
-```
+{{< / highlight >}}
 
 It was easy to see invocations, and more detail in the terminal too:
 

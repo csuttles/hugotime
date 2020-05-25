@@ -34,7 +34,7 @@ This is basically a right of passage from "I'm interested in k8s" to "I know som
 
 Because the [CKA](https://www.cncf.io/certification/cka/) is a practical exam, I feel this is the best kind of preparation. You need to be able to manage workloads ([Pods](https://kubernetes.io/docs/concepts/workloads/pods/) and [Controllers](https://kubernetes.io/docs/concepts/workloads/controllers/)) and [Services](https://kubernetes.io/docs/concepts/services-networking/service/). It's important to get familiar with the [documentation](https://kubernetes.io/docs/home/?path=users&persona=cluster-operator&level=foundational), since you _can_ reference the official docs (in a single tab) during the exam. Get to know the `kubectl` command intimately; the `kubectl explain` subcommand is something worth exploring deeply since you can use it to get the definitions for all api-resource types from the command line. This can really help when you are trying to write a spec and get stuck. For a quick example, let's look at the output of `kubectl explain pod.spec.affinity`:
 
-```
+{{< highlight markdown >}}
 KIND:     Pod
 VERSION:  v1
 
@@ -56,7 +56,7 @@ FIELDS:
    podAntiAffinity	<Object>
      Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod
      in the same node, zone, etc. as some other pod(s)).
-```
+{{< / highlight >}}
 
 You can look at any api resource this way, and drill down as far as you like, using the dot delimited notation.
 

