@@ -31,3 +31,5 @@ HUGO_ENABLEGITINFO = "true"
 
 [[plugins]]
 package = "netlify-plugin-amp-server-side-rendering"
+package = "netlify-plugin-is-website-vulnerable"
+
