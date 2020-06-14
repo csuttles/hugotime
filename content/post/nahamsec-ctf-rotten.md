@@ -9,6 +9,8 @@ title:  "Nahamcon CTF"
 aliases:  ["/nahamcon-ctf-rotten/"]
 tags: ["CTF", "Python"]
 categories: ["CTF", "Python"]
+cover: "/images/2020/06/naham_banner.png"
+
 
 ---
 
