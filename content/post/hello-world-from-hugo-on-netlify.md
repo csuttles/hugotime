@@ -1,7 +1,7 @@
 +++
 title =  "Hugo on Netlify"
 date = 2020-06-01T13:52:40-07:00
-draft = true
+draft = false
 author = "Chris Suttles"
 categories = ["hugo", "netlify", "golang", "javascript"]
 description = "Migrating from Ghost on AWS to Hugo on Netlify"
@@ -130,7 +130,7 @@ and something like this pseudo code example:
 
 {{< highlight bash >}}
 for post in $(find . -type f -name '*.md' -print | sed -e 's/.md$//')
-do  
+do
     TMPFILE=$(mktemp)
     curl https://somehost/api/getpost?slug=${post} | perl -ne 'next if /^foo_bar = baz/; print' | tee ${TMPFILE}
     curl -X POST https://somehost/api/editpost?slug=${post} --data @${TMPFILE}
