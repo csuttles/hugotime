@@ -54,10 +54,10 @@ enableEmoji = false
   backgroundImage = "/images/bg.jpg"
   linkColor = "seagreen"
 
-  author = "Chris_Suttles = csuttles = ctlfish"
-  description = "where in the world is Rick Ross?"
+  author = "csuttles"
+  description = "stuff and things"
   avatar = "/images/me.jpg"
-  motto = "# your hustle will determine your worth"
+  motto = "Memento Mori"
 
   email = "blog@ctlfish.org"
   twitter = "ctlfish_"
